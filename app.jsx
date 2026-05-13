@@ -894,6 +894,67 @@ const ALARMS = {
     d:"The CT1 communication network is not working properly. The SAAS machine has lost communication with the CT1 unit.",
     f:"Step 1: Check the CT1 communication network cables for loose connections or damage. Step 2: Check the correct electrical installation of the CT1 communication network. Step 3: Press the RESTART CONTROLLER button on the System page on the HMI. Step 4: If problem persists, check the CT1 network switch and power supply." },
 
+
+  "1202": { s:"LINE", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"MACHINE READY",
+    d:"The machine is ready to run. All conditions are met for starting production.",
+    f:"You can press the START button to begin production." },
+
+  "1203": { s:"LINE", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"MACHINE RUNNING",
+    d:"The machine is currently running and producing.",
+    f:"Press STOP to stop the machine when required." },
+
+  "1204": { s:"LINE", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"REINIT ACTIVE",
+    d:"The motors are carrying out the automatic REINIT (re-initialization) procedure to bring all sections to the end-of-cycle position.",
+    f:"Wait for the REINIT procedure to complete automatically. At the end of the procedure it will be possible to start the machine." },
+
+  "1206": { s:"LINE", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"TANK FILLING ACTIVE",
+    d:"The automatic tank filling system is active. While this warning is displayed, dosing accuracy is not guaranteed.",
+    f:"Wait for the filling to finish or interrupt it by disabling the tank level control from the HMI. Ensure at least 20 liters is in the tank before resuming production." },
+
+  "1207": { s:"LINE", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"HOSES EMPTYING ACTIVE",
+    d:"The hoses emptying procedure is active. While this warning is displayed dosing accuracy is not guaranteed.",
+    f:"Wait for the hoses emptying procedure to complete. Ensure at least 20 liters of product is available in the tank before resuming." },
+
+  "3000": { s:"FORM", c:"RED", st:"IMMEDIATE STOP", p:"SKILLED OPERATOR", by:"NO",
+    n:"IRREGULAR STRESS ON CRIMPING DEVICES",
+    d:"This alarm is activated when the torque limiter is activated to protect the transmission of the crimping (arricchimento) device. The torque limiter has detected abnormal mechanical stress.",
+    f:"Step 1: Check if there is any mechanical obstruction in the crimping device. Remove any obstruction found. Step 2: Reset the torque limiter to the operating position. Step 3: Restart the machine." },
+
+  "5406": { s:"TANK", c:"YELLOW", st:"END OF CYCLE", p:"OPERATOR", by:"YES",
+    n:"THERMOBLANKET TEMPERATURE – OUT OF TOLERANCE",
+    d:"The thermoblanket temperature is 2.5°C higher or lower than the set temperature.",
+    f:"Wait for the operating temperature to be reached — alarm resets automatically. If not reached within an acceptable time, look for the eventual causes in the thermoregulation system and check the probe for malfunctioning." },
+
+  "9214": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 FILM FEEDING NOT CORRECT",
+    d:"The CT1 film/band advancement is not performing correctly.",
+    f:"Check the correct functioning of the CT1 advancement system and the correct functioning of the conveyor belt." },
+
+  "9215": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 BUFFER CONTAINER EMPTY",
+    d:"The CT1 buffer tank does not contain a sufficient quantity of suppositories.",
+    f:"Wait for the SAAS machine to produce a sufficient amount of suppositories. The CT1 will restart automatically once enough stock is available." },
+
+  "9216": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 STRIP RELEASE NOT CORRECT",
+    d:"The strip is not being released correctly during the CT1 strip stacking and release phase.",
+    f:"Check the correct functioning of the CT1 strip release mechanism. Verify the strip stacking system operation." },
+
+  "9221": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 END PRODUCTION – FULL TANK",
+    d:"The production order count has reached the target value set in the order opening phase. The CT1 buffer tank is full.",
+    f:"End the current production order from the HMI. Close the current order." },
+
+  "9226": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 OVERTIME REEDS",
+    d:"The CT1 control has detected an incorrect movement of a pneumatic cylinder during the machine cycle.",
+    f:"Check the incorrect cylinder on the CT1 panel and restore its operation. Verify the correct functioning of the cylinder." },
+
 };
 
 // ============================================================
