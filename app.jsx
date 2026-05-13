@@ -828,6 +828,72 @@ const ALARMS = {
     n:"EMERGENCY BUTTON – CUTTING SECTION",
     d:"An emergency stop button at the cutting section has been pressed.",
     f:"Identify and resolve the emergency situation. Verify the machine is safe and nobody is working on it. Reset the emergency button (twist or pull to release). Press RESET and perform REINIT before restarting." },
+
+  "9200": { s:"CT1", c:"YELLOW", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 SAFETY GUARD OPEN",
+    d:"The CT1 safety guard door is open.",
+    f:"Close the safety guard securely. Check the guard sensor and interlock." },
+
+  "9202": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 SAFETY GUARD SAFETY UNIT ERROR",
+    d:"An error has been detected on the CT1 safety guard PLC safety module. On the CT1 itself this triggers an IMMEDIATE STOP with RED lamp; on the SAAS machine it shows as a WARNING with NO STOP.",
+    f:"Check the correct functioning of the PLC safety modules in the relevant electrical box. Check the safety module LED status codes. Contact Electrical Technician." },
+
+  "9204": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 EMERGENCY BUTTON PRESSED",
+    d:"The emergency stop button on the CT1 unit has been pressed. On CT1 itself: IMMEDIATE STOP with RED lamp. On SAAS machine: WARNING with NO STOP (machine keeps running).",
+    f:"Verify the line is safe and nobody is working on the CT1. Reset the emergency button (twist or pull to release). Then press RESET on the mobile push button panel." },
+
+  "9209": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 AIR PRESSURE SWITCH – LOW PRESSURE",
+    d:"The current value of the CT1 air pressure is lower than the relevant parameter set on the HMI.",
+    f:"Check the correct installation and supply of the CT1 pneumatic system. Verify the air pressure supply to the CT1 unit and check for leaks." },
+
+  "9212": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 WASTE ERROR",
+    d:"A waste/reject error has been detected on the CT1 — there is a mismatch between the signals of the quality control capacitive sensor.",
+    f:"Check the correct functioning of the capacitive sensor. Verify the relative functioning of the sensor and check it is operating correctly." },
+
+  "9214": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 FILM FEEDING NOT CORRECT",
+    d:"The CT1 film/band advancement is not performing correctly.",
+    f:"Check the correct functioning of the CT1 advancement system and the correct functioning of the conveyor belt." },
+
+  "9215": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 BUFFER CONTAINER EMPTY",
+    d:"The CT1 buffer tank is empty — it does not contain a sufficient quantity of suppositories.",
+    f:"Wait for the SAAS machine to produce a sufficient amount of suppositories, then the CT1 will restart automatically." },
+
+  "9216": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 STRIP RELEASE NOT CORRECT",
+    d:"The strip is not being released correctly during the CT1 strip stacking phase.",
+    f:"Check the correct functioning of the CT1 strip release system. Verify the strip stacking mechanism." },
+
+  "9217": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 FILM STOCK EXHAUSTED",
+    d:"The number of suppositories inside the CT1 buffer tank is lower than the relevant value set on the HMI.",
+    f:"Wait for the SAAS machine to produce a sufficient amount of suppositories. The CT1 will restart automatically once enough stock is available." },
+
+  "9218": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 STOP BUTTON PRESSED",
+    d:"The stop button of the CT1 unit has been pressed.",
+    f:"Press the RESET button on the CT1 unit to resume operation." },
+
+  "9221": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 END PRODUCTION – FULL TANK",
+    d:"The production order count has reached the target value set in the order opening phase. The CT1 buffer tank is full.",
+    f:"End the current production order from the HMI. Close the current order." },
+
+  "9226": { s:"CT1", c:"GREEN", st:"NO STOP", p:"OPERATOR", by:"NO",
+    n:"CT1 OVERTIME REEDS",
+    d:"The CT1 control has detected an incorrect movement of a pneumatic cylinder during the machine cycle.",
+    f:"Check the incorrect cylinder on the CT1 panel and restore its operation. Verify the correct functioning of the cylinder." },
+
+  "9910": { s:"CT1", c:"YELLOW", st:"NO STOP", p:"ELECTRICAL TECHNICIAN", by:"NO",
+    n:"COMMUNICATION CT1 MISSING",
+    d:"The CT1 communication network is not working properly. The SAAS machine has lost communication with the CT1 unit.",
+    f:"Step 1: Check the CT1 communication network cables for loose connections or damage. Step 2: Check the correct electrical installation of the CT1 communication network. Step 3: Press the RESTART CONTROLLER button on the System page on the HMI. Step 4: If problem persists, check the CT1 network switch and power supply." },
+
 };
 
 // ============================================================
@@ -840,6 +906,7 @@ const SECTION_COLORS = {
   COOL: { badge:"bg-cyan-700 text-cyan-100",    dot:"bg-cyan-400"    },
   SEAL: { badge:"bg-green-700 text-green-100",  dot:"bg-green-400"   },
   CUT:  { badge:"bg-rose-700 text-rose-100",    dot:"bg-rose-400"    },
+  CT1:  { badge:"bg-yellow-700 text-yellow-100", dot:"bg-yellow-400" },
 };
 
 const STOP_STYLE = {
@@ -1147,7 +1214,7 @@ function App() {
   const [selected, setSelected] = useState(null);
   const [showAPK, setShowAPK] = useState(false);
 
-  const sections = ["ALL","LINE","REEL","FORM","DOSE","TANK","COOL","SEAL","CUT"];
+  const sections = ["ALL","LINE","REEL","FORM","DOSE","TANK","COOL","SEAL","CUT","CT1"];
   const stopTypes = ["ALL","IMMEDIATE STOP","END OF CYCLE","PREVENTED START","NO STOP"];
   const colorTypes = ["ALL","RED","YELLOW","GREEN"];
 
