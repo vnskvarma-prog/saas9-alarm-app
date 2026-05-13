@@ -1,0 +1,17 @@
+{
+  "name": "SAAS 9 AP Alarm Reference",
+  "short_name": "SAAS9",
+  "description": "Alarm lookup and fix guide for SAAS 9 AP suppository machine S/N 1577",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#0f172a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/color/96/alarm.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    }
+  ]
+}
