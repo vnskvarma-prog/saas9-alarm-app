@@ -957,6 +957,7 @@ const ALARMS = {
 
 };
 
+
 // ============================================================
 const SECTION_COLORS = {
   LINE: { badge:"bg-blue-700 text-blue-100",   dot:"bg-blue-400"    },
@@ -1209,7 +1210,746 @@ function AlarmDetail({ num, alarm, onClose }) {
   );
 }
 
+
 // ============================================================
+// FORMAT CHANGE PAGE COMPONENT
+// ============================================================
+
+
+// ============================================================
+
+// ============================================================
+// SIZE FORMAT CHANGE — SAAS 9 AP S/N 1577
+// Source: Chapter 8, Operator Handbook Rev 1.0.0 (March 2025)
+// Data verified line-by-line from PDF pages 233–245
+//
+// SIZES:
+//   Size 1 = Code Q = Part# Q100124841  (PVC/VP)
+//   Size 2 = Code R = Part# R100124851  (PVC/VP)
+//   Size 3 = Code S = Part# S100124861  (PVC/VP)
+//   Size 4 = Code F = Part# F100213631  (ALU/VA)
+//   Size 5 = Code H = Part# H100213680  (ALU/VA)
+//
+// FIGURE MAP (from handbook):
+//   Fig.82 = diagram for PVC A-Section table    (table data below, fig ref on page 234)
+//   Fig.83 = drawing of PVC A-Section parts     (diagram only page 235)
+//   Fig.84 = diagram for ALU A-Section table    (table data below, fig ref on page 236)
+//   Fig.85 = drawing of ALU A-Section parts     (diagram only page 237)
+//   Fig.88 = diagram for B-Section table        (table data below, fig ref on page 238)
+//   Fig.89 = drawing of B-Section parts         (diagram only page 239)
+//   Fig.90 = diagram for PVC C-Section table    (table data below, fig ref on page 240)
+//   Fig.91 = drawing of PVC C-Section parts     (diagram only page 241)
+//   Fig.92 = diagram for ALU C-Section table    (table data below, fig ref on page 242)
+//   Fig.93 = drawing of ALU C-Section parts     (diagram only page 243)
+//   Fig.94 = diagram for CT1 Connection table   (table data below, fig ref on page 244)
+//   Fig.95 = drawing of CT1 Connection parts    (diagram only page 245)
+// ============================================================
+
+const SIZES = {
+  "1": { code:"Q", partNo:"Q100124841", material:"PVC (VP)", bg:"bg-blue-700" },
+  "2": { code:"R", partNo:"R100124851", material:"PVC (VP)", bg:"bg-indigo-700" },
+  "3": { code:"S", partNo:"S100124861", material:"PVC (VP)", bg:"bg-violet-700" },
+  "4": { code:"F", partNo:"F100213631", material:"ALU (VA)", bg:"bg-amber-700" },
+  "5": { code:"H", partNo:"H100213680", material:"ALU (VA)", bg:"bg-orange-700" },
+};
+
+// Each TABLE entry:
+//   tableRef  = the table reference figure shown at bottom of data page (e.g. "fig.82")
+//   drawRef   = the full drawing figure on the next page (e.g. "fig.83")
+//   title     = section description
+//   section   = "A" | "B" | "C" | "CT1"
+//   sizes     = which size numbers this table applies to
+//   note      = important notes
+//   parts     = array of part rows, EXACTLY as in PDF
+//     Each part: { pos, desc, partNo, qty, s1, s2, s3, s4, s5 }
+//     s1–s5 = code letter for that size, or "" if not applicable for that size
+//     "---" means part exists but no specific code (not required / not changed)
+
+const TABLES = [
+  {
+    tableRef: "fig.82",
+    drawRef:  "fig.83",
+    title:    "A Section — PVC/VP",
+    subtitle: "SAAS 9 AP/VP \"A\" SECTION LIST FOR SIZE CHANGE PART",
+    section:  "A",
+    sizes:    [1,2,3],
+    note:     "Handle code 015040570 (M6 thread) for PVC mould dies. Handle code 551510155 (M8 thread) for ALU valve sealing & knurling dies.",
+    parts: [
+      // Exactly as on PDF page 234 — description, fig, pos, partNo, qty, s1, s2, s3, s4, s5
+      { pos:"1",    desc:"Rear Sealing Die",                            partNo:"0200", qty:"1",  s1:"Q", s2:"R", s3:"S", s4:"",  s5:"" },
+      { pos:"2",    desc:"Front Sealing Die",                           partNo:"0250", qty:"1",  s1:"Q", s2:"R", s3:"S", s4:"",  s5:"" },
+      { pos:"3",    desc:"Rear Pre-Heating Die",                        partNo:"0270", qty:"1",  s1:"Q", s2:"R", s3:"S", s4:"",  s5:"" },
+      { pos:"4",    desc:"Front Pre-Heating Die",                       partNo:"0280", qty:"1",  s1:"Q", s2:"R", s3:"S", s4:"",  s5:"" },
+      { pos:"5",    desc:"Rear Forming Die",                            partNo:"0330", qty:"1",  s1:"Q", s2:"R", s3:"S", s4:"",  s5:"" },
+      { pos:"6",    desc:"Front Forming Die",                           partNo:"0350", qty:"1",  s1:"Q", s2:"R", s3:"S", s4:"",  s5:"" },
+      { pos:"7",    desc:"Blade-Guide",                                 partNo:"0170", qty:"4",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"8",    desc:"Lateral Film Guides After Forming",           partNo:"8700", qty:"2",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"9",    desc:"Central Film Guide After Forming",            partNo:"9000", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"10",   desc:"Backing Piece for Container Forming Control", partNo:"0190", qty:"1",  s1:"Q", s2:"R", s3:"S", s4:"",  s5:"" },
+      { pos:"13",   desc:"Front Centring Die Under the Pump",           partNo:"2200", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"14",   desc:"Rear Centring Die Under the Pump",            partNo:"2100", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"15",   desc:"Front Film Guide at the Pump Exit",           partNo:"3700", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"16",   desc:"Rear Film Guide at the Pump Exit",            partNo:"3600", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"17",   desc:"Pump Body",                                   partNo:"2770", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"18",   desc:"Bracket Controlling the Pump Pistons",        partNo:"3000", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"19",   desc:"Plate for Transfer Pistons Connection",       partNo:"3150", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"20",   desc:"Filling Nozzle — NOT DECOMPOSABLE",           partNo:"3550", qty:"9",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"20",   desc:"Filling Nozzle — DECOMPOSABLE",               partNo:"3560", qty:"9",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"20.1", desc:"Nozzle Delivery-Tube — NOT DECOMPOSABLE",     partNo:"3400", qty:"9",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"20.1", desc:"Nozzle Delivery-Tube — DECOMPOSABLE",         partNo:"3410", qty:"9",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"24",   desc:"Backing Guide for Film Entrainment Roll",     partNo:"0500", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"25",   desc:"Roll for Film Entrainment",                   partNo:"0100", qty:"1",  s1:"Q", s2:"R", s3:"S", s4:"",  s5:"" },
+      { pos:"26",   desc:"Star-Wheel for Film Guide, with Hub",         partNo:"4000", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"27",   desc:"Film Guide",                                  partNo:"3500", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"28",   desc:"Spacer for Blowing Nozzles Regulation",       partNo:"0160", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"29",   desc:"Spacer Columns for Retractor Heated",         partNo:"0140", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+    ]
+  },
+
+  {
+    tableRef: "fig.84",
+    drawRef:  "fig.85",
+    title:    "A Section — ALU/VA",
+    subtitle: "SAAS 9 AP/VA \"A\" SECTION LIST FOR SIZE CHANGE PART",
+    section:  "A",
+    sizes:    [4,5],
+    note:     "Handle code 551510155 (M8 thread) for ALU valve sealing and knurling dies. Note: Filling Nozzle and Nozzle Delivery-Tube reference Fig.83 part numbers (same parts).",
+    parts: [
+      // Exactly as on PDF page 236
+      { pos:"1",    desc:"Drawing Die",                                 partNo:"---",  qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"H" },
+      { pos:"2",    desc:"Rolls for Film Adjustment",                   partNo:"0150", qty:"2",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"3",    desc:"Bracket for False Nozzles Clamping",          partNo:"2300", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"4",    desc:"Front Contour Sealing Die",                   partNo:"2700", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"H" },
+      { pos:"5",    desc:"Rear Contour Sealing Die",                    partNo:"2600", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"H" },
+      { pos:"8",    desc:"Lateral Film Guides After Forming",           partNo:"8700", qty:"2",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"9",    desc:"Central Film Guide After Forming",            partNo:"9000", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"13",   desc:"Front Centring Die Under the Pump",           partNo:"2250", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"14",   desc:"Rear Centring Die Under the Pump",            partNo:"2150", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"15",   desc:"Front Film Guide at the Pump Exit",           partNo:"3700", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"16",   desc:"Rear Film Guide at the Pump Exit",            partNo:"3600", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"17",   desc:"Pump Body",                                   partNo:"2770", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"18",   desc:"Bracket Controlling the Pump Pistons",        partNo:"3000", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"19",   desc:"Plate for Transfer Pistons Connection",       partNo:"3150", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"20",   desc:"Filling Nozzle — NOT DECOMPOSABLE (ref.83)",  partNo:"3550", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"20",   desc:"Filling Nozzle — DECOMPOSABLE (ref.83)",      partNo:"3560", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"20.1", desc:"Nozzle Delivery-Tube — NOT DECOMPOSABLE (ref.83)", partNo:"3400", qty:"1", s1:"", s2:"", s3:"", s4:"F", s5:"F" },
+      { pos:"20.1", desc:"Nozzle Delivery-Tube — DECOMPOSABLE (ref.83)",partNo:"3410", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"24",   desc:"Backing Guide for Film Entrainment Roll",     partNo:"0500", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"25",   desc:"Roll for Film Entrainment",                   partNo:"0100", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"H" },
+      { pos:"26",   desc:"Star-Wheel for Film Guide, with Hub",         partNo:"4000", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"27",   desc:"Film Guide",                                  partNo:"3500", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+    ]
+  },
+
+  {
+    tableRef: "fig.88",
+    drawRef:  "fig.89",
+    title:    "B Section — Cooling (All Sizes)",
+    subtitle: "SAAS 9/AP FOUR STAGES \"B\" SECTION LIST FOR SIZE CHANGE PART",
+    section:  "B",
+    sizes:    [1,2,3,4,5],
+    note:     "⚠️ B Section format change is needed ONLY if the packaging film HEIGHT has changed. Pin for Spacer: Sizes 1-3 use part 024061915; Sizes 4-5 use part 024061917. Spacer Pin on Cover: Sizes 1-3 use 024061916; Sizes 4-5 use 024061918.",
+    parts: [
+      // Exactly as on PDF page 238
+      { pos:"28",   desc:"Upper Spirals Spacers",                       partNo:"4600",      qty:"17", s1:"Q",  s2:"Q",  s3:"Q",  s4:"F",  s5:"F" },
+      { pos:"30",   desc:"Pin for Spacer Fixing the Spirals (S1-3: 024061915 / S4-5: 024061917)", partNo:"4300", qty:"16", s1:"Q+", s2:"Q+", s3:"Q+", s4:"Q+", s5:"Q+" },
+      { pos:"31",   desc:"Spacer Pin on Cover (S1-3: 024061916 / S4-5: 024061918)",              partNo:"4700", qty:"4",  s1:"Q+", s2:"Q+", s3:"Q+", s4:"Q+", s5:"Q+" },
+      { pos:"32",   desc:"Film Guide in the Cooling Section",           partNo:"4750",      qty:"1",  s1:"Q",  s2:"Q",  s3:"Q",  s4:"F",  s5:"F" },
+    ]
+  },
+
+  {
+    tableRef: "fig.90",
+    drawRef:  "fig.91",
+    title:    "C Section — PVC/VP",
+    subtitle: "SAAS 9 AP/VP \"C\" SECTION LIST FOR SIZE CHANGE PART",
+    section:  "C",
+    sizes:    [1,2,3],
+    note:     "Pos 55 (Rear Film Guide) and Pos 56 (Front Film Guide) show '---' for all PVC sizes — these parts are not changed during PVC format changeover.",
+    parts: [
+      // Exactly as on PDF page 240
+      { pos:"33",   desc:"Star-Wheel for Film Guide, with Hub",         partNo:"4000", qty:"2",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"34",   desc:"Left Pre-Heating Die",                        partNo:"5060", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"35",   desc:"Right Pre-Heating Die",                       partNo:"5050", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"38",   desc:"Film Guide",                                  partNo:"5450", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"39",   desc:"Spacers for Pre-Heating",                     partNo:"5150", qty:"2",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"40",   desc:"Roll for Film Entrainment",                   partNo:"5410", qty:"1",  s1:"Q", s2:"R", s3:"S", s4:"",  s5:"" },
+      { pos:"41",   desc:"Front Top Sealing Die",                       partNo:"5380", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"42",   desc:"Rear Top Sealing Die",                        partNo:"5370", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"43",   desc:"Spacers for Pre-Heating",                     partNo:"5170", qty:"2",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"43.1", desc:"Top Sealing Front Pre-Heating Die",           partNo:"7300", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"43.2", desc:"Top Sealing Rear Pre-Heating Die",            partNo:"7500", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"44",   desc:"Front Knurling Die",                          partNo:"6300", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"45",   desc:"Rear Knurling Die",                           partNo:"6200", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"46",   desc:"Perforation and Shearing Die",                partNo:"---",  qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"47",   desc:"Film Entrainment Roll",                       partNo:"9100", qty:"1",  s1:"Q", s2:"R", s3:"S", s4:"",  s5:"" },
+      { pos:"48",   desc:"Guide for Film Entrainment Roll",             partNo:"9030", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"49",   desc:"Backing Guide for Film Entrainment Roll",     partNo:"9300", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"50",   desc:"Film Guide in Front of Trimming",             partNo:"9800", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"51",   desc:"Film Guide for Trimming Backing-Blades",      partNo:"9950", qty:"1",  s1:"Q", s2:"R", s3:"S", s4:"",  s5:"" },
+      { pos:"52",   desc:"Film Guide for Trimming Blades",              partNo:"9900", qty:"1",  s1:"Q", s2:"R", s3:"S", s4:"",  s5:"" },
+      { pos:"53",   desc:"Backing for Film Entrainment Roll",           partNo:"8300", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"",  s5:"" },
+      { pos:"54",   desc:"Film Entrainment Roll",                       partNo:"8200", qty:"1",  s1:"Q", s2:"R", s3:"S", s4:"",  s5:"" },
+      { pos:"55",   desc:"Rear Film Guide",                             partNo:"8500", qty:"1",  s1:"---",s2:"---",s3:"---",s4:"",s5:"" },
+      { pos:"56",   desc:"Front Film Guide",                            partNo:"8400", qty:"1",  s1:"---",s2:"---",s3:"---",s4:"",s5:"" },
+    ]
+  },
+
+  {
+    tableRef: "fig.92",
+    drawRef:  "fig.93",
+    title:    "C Section — ALU/VA",
+    subtitle: "SAAS 9 AP/VA \"C\" SECTION LIST FOR SIZE CHANGE PART",
+    section:  "C",
+    sizes:    [4,5],
+    note:     "Pos 55 (Rear Film Guide) and Pos 56 (Front Film Guide) show '---' for all ALU sizes — not changed during ALU format changeover.",
+    parts: [
+      // Exactly as on PDF page 242
+      { pos:"33",   desc:"Star-Wheel for Film Guide, with Hub",                partNo:"4000", qty:"2",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"34",   desc:"Left and Right Die for Crimping Sealing",            partNo:"4780", qty:"2",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"36",   desc:"Left Film Guide",                                    partNo:"8970", qty:"2",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"37",   desc:"Right Film Guide",                                   partNo:"8950", qty:"2",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"38",   desc:"Film Guide",                                         partNo:"5450", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"40",   desc:"Roll for Film Entrainment",                          partNo:"5410", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"H" },
+      { pos:"41",   desc:"Front Top Sealing Die",                              partNo:"5300", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"42",   desc:"Rear Top Sealing Die",                               partNo:"5200", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"44",   desc:"Front Knurling Die",                                 partNo:"6310", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"H" },
+      { pos:"45",   desc:"Rear Knurling Die",                                  partNo:"6210", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"H" },
+      { pos:"46",   desc:"Perforation and Shearing Die",                       partNo:"---",  qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"47",   desc:"Film Entrainment Roll",                              partNo:"9100", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"H" },
+      { pos:"48",   desc:"Guide for Film Entrainment Roll",                    partNo:"9030", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"49",   desc:"Backing Guide for Film Entrainment Roll",            partNo:"9300", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"50",   desc:"Film Guide in Front of Trimming",                    partNo:"9800", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"51",   desc:"Film Guide for Trimming Backing-Blades",             partNo:"9950", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"52",   desc:"Film Guide for Trimming Blades",                     partNo:"9900", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"53",   desc:"Guide for Film Entrainment Roll Backing Piece",      partNo:"8300", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"F" },
+      { pos:"54",   desc:"Film Entrainment Roll",                              partNo:"8200", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"F", s5:"H" },
+      { pos:"55",   desc:"Rear Film Guide",                                    partNo:"8500", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"---",s5:"---" },
+      { pos:"56",   desc:"Front Film Guide",                                   partNo:"8400", qty:"1",  s1:"",  s2:"",  s3:"",  s4:"---",s5:"---" },
+    ]
+  },
+
+  {
+    tableRef: "fig.94",
+    drawRef:  "fig.95",
+    title:    "CT/1 Connection (All Sizes)",
+    subtitle: "CT/1 CONNECTION LIST FOR SIZE CHANGE PART",
+    section:  "CT1",
+    sizes:    [1,2,3,4,5],
+    note:     "Pos 4 and 5 are Italian-named in original handbook: Pos 4 = 'Riscontro Inferiore per Capacitivo' (Lower Check for Capacitive Sensor); Pos 5 = 'Dima di Regolazione Guide' (Guide Adjustment Template).",
+    parts: [
+      // Exactly as on PDF page 244
+      { pos:"1",    desc:"Film Entrainment Roll",                        partNo:"0100", qty:"1",  s1:"Q", s2:"R", s3:"S", s4:"F", s5:"H" },
+      { pos:"2",    desc:"Guide for Piling",                             partNo:"0500", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"Q", s5:"Q" },
+      { pos:"3",    desc:"Guides Spacer",                                partNo:"0300", qty:"1",  s1:"Q", s2:"Q", s3:"Q", s4:"F", s5:"H" },
+      { pos:"4",    desc:"Lower Check for Capacitive Sensor",            partNo:"0900", qty:"1",  s1:"Q", s2:"R", s3:"S", s4:"F", s5:"H" },
+      { pos:"5",    desc:"Guide Adjustment Template",                    partNo:"1100", qty:"2",  s1:"Q", s2:"R", s3:"S", s4:"F", s5:"H" },
+    ]
+  },
+];
+
+// ============================================================
+// MACHINE PREPARATION STEPS (PDF page 209, section before 8.1)
+// ============================================================
+const PREP_STEPS = [
+  "Deactivate ALL resistances — wait until temperature falls to at least 30°C",
+  "Open the film mover grippers",
+  "Open the sealing, preheating and moulding dies",
+  "Disable the moulding blower",
+  "Open the under-pump centring dies",
+  "Activate the 'Introduce A section film' command",
+  "Disconnect pneumatic power supply for complete safety (see attached pneumatic chart)",
+  "IF pump parts are being changed: close product tank feed tap → start machine → wait until dosage pump clears all pharmaceutical product from feed tube and pump",
+];
+
+// ============================================================
+// CHANGEOVER STEPS — verbatim from PDF pages 210–225
+// ============================================================
+const STEPS = [
+  {
+    ref: "8.1.1", title: "A Section — Film Supply and Movement",
+    icon: "🎞️",
+    items: [
+      "If changing to different height reels: adjust front reel height by working on the screw in the centre of the product holder reel",
+      "Adjust the inner part height of the movement grippers using the template provided as reference",
+      "Replace the film coupling rollers in front of the aluminium valve sealing station",
+      "Replace the band tensioner assembly components in front of the dosage pump",
+      "Replace the guide and movement components of the A and B parts synchronisation assemblies",
+    ]
+  },
+  {
+    ref: "8.1.2a", title: "A Section — ALU Drawing Station",
+    icon: "🏭",
+    items: [
+      "Dismantle the toothed wheel protective guard (1)",
+      "Dismantle the two die opening and closing command protective guards (2)",
+      "Loosen the six locking screws (3)",
+      "Screw the eyelet (4) onto the die and remove it from the centring pin using the proper two-speed hoist — raise the die carefully to prevent extracting the pin so it bends and damages the centring tops",
+      "Take the other die and before introducing it into its proper pins, ensure the toothed wheel (2) for die crimping command engages the toothed wheel on the machine at the position defined by the reference level marks on the wheels",
+      "Introduce the die into the pins and tighten the six die locking screws",
+    ]
+  },
+  {
+    ref: "8.1.2b", title: "A Section — Top Sealing Valve Station",
+    icon: "🔩",
+    items: [
+      "Loosen the grub nuts (1) — two per die — then remove the dies from the centring pins using the proper handle provided (code 551510155)",
+      "Still using the provided handle, insert the new dies in the correct position using the centring pins and tighten the grub screws",
+      "Release the pressure from the pneumatic system with the main valve (see pneumatic system) and insert the spacer (2)",
+      "Replace the separator (3)",
+    ]
+  },
+  {
+    ref: "8.1.3", title: "A Section — PVC Plastic Forming Station",
+    icon: "🔧",
+    items: [
+      "Loosen and remove the locking wheel (5)",
+      "Raise the separator assembly (1)",
+      "Replace the 'V spacer' assembly spacer (6) and the blower nozzle assembly spacer (7)",
+      "Loosen the grub nuts (2) — two per die — then remove the dies from the centring pins using the proper handle provided (code 015040570)",
+      "Still using the provided handle, insert the new dies in the correct position using the centring pins and tighten the grub screws (2) again",
+      "Adjust the separator (3) height by loosening the screws and shifting it along the eyelets up to the die stops",
+      "Replace the lower guides under the dies, the guides immediately following the station, and adjust the height of the upper opposing ones (4)",
+    ]
+  },
+  {
+    ref: "8.1.4", title: "A Section — Good Forming Control Station",
+    icon: "✅",
+    items: [
+      "Replace the parts (probe and contrast) of the good moulding monitoring assembly",
+    ]
+  },
+  {
+    ref: "8.1.5", title: "A Section — Dosing Station",
+    icon: "💉",
+    items: [
+      "Disconnect the product feed tube connection",
+      "Disconnect the product recirculation tube connection",
+      "Loosen the side handwheels (1)",
+      "Loosen the handwheel at the back of the pump",
+      "Remove the pump and, on the workbench, proceed to replace the parts indicated in the 'Changing format table'",
+      "Replace the pump",
+      "Tighten all the handwheels that had been removed previously",
+      "Loosen the under pump centring grub nuts (3) then remove the dies from their relative centring pins using the handle (code 015040750); install the new dies proceeding in the opposite direction",
+      "Replace the band guide behind the pump (4)",
+      "Adjust the height of the punching unit using the relevant spacer",
+    ]
+  },
+  {
+    ref: "8.2", title: "B Section — Cooling Spirals",
+    icon: "❄️",
+    items: [
+      "⚠️ Format change in the cooling area is needed ONLY if the packaging film height has been changed",
+      "Loosen the handwheels at the corners of the upper spirals",
+      "Remove the spiral using the appropriate handles",
+      "Proceed with replacing the spacers and guides indicated in the changing format table",
+      "Reposition the spiral and tighten the handwheels",
+    ]
+  },
+  {
+    ref: "8.3.1", title: "C Section — Film Movement",
+    icon: "🎬",
+    items: [
+      "Replace the 2 wheels (1) and the guide (2)",
+      "Replace the first band feed roller (3)",
+      "Replace the second band feed roller (4) and the relative opposing ones",
+      "Replace the end band feed roller to the cutter (5) and its contrast",
+      "Replace the guide before the strip cutter shears (6)",
+      "Replace the upper opposing spacer between the top sealing and the coding die (7)",
+    ]
+  },
+  {
+    ref: "8.3.2", title: "C Section — Sealing / Crimping Station",
+    icon: "🔥",
+    items: [
+      "Dismantle the heat protective guards with their 4 screws (1)",
+      "Dismantle the temperature probes (2) and resistances",
+      "Replace the dies (3)",
+      "Replace the guides (4)",
+    ]
+  },
+  {
+    ref: "8.3.3", title: "C Section — Top Sealing Pre-Heating Station",
+    icon: "🌡️",
+    items: [
+      "Dismantle the heat protective guards with their 4 screws (1)",
+      "Dismantle the temperature probes (2) and resistances",
+      "Replace the spacers and the dies (3)",
+    ]
+  },
+  {
+    ref: "8.3.4", title: "C Section — Top Sealing Station",
+    icon: "♨️",
+    items: [
+      "Replace the top sealing dies (1)",
+    ]
+  },
+  {
+    ref: "8.3.5", title: "C Section — Station for Heating Again After Stopping",
+    icon: "🔆",
+    items: [
+      "Replace the reheating dies (1)",
+    ]
+  },
+  {
+    ref: "8.3.6", title: "C Section — Knurling and Coding Station",
+    icon: "🖨️",
+    items: [
+      "Replace the knurling and coding dies (1)",
+    ]
+  },
+  {
+    ref: "8.3.7", title: "C Section — Cutting Station",
+    icon: "✂️",
+    items: [
+      "⚠️ During transport of the cutting device pay attention to its heavy weight — move it with necessary equipment (hoist)",
+      "Remove its aluminium protective cover",
+      "Loosen the front locking screws and the four rear locking screws (1) and the two tie-rod joint screws — upper and lower (2)",
+      "Remove the whole assembly without forcing the centring pins and lay it down on the workbench",
+      "Install the new group on the machine — make sure you correctly fit the centring pins into it — and tighten the screws (1) and (2) again",
+    ]
+  },
+  {
+    ref: "8.3.8", title: "C Section — Trimming Station",
+    icon: "⚡",
+    items: [
+      "⚠️ Be careful handling the cutting parts",
+      "Before removing the safety guard of the cutting scissors unit: install the scissors locking screw (M8×45) into the specific hole indicated in the figure",
+      "Dismantle the knife and circular counter-knife, take out the spacers, install the new spacers, then refit the knife and circular counter-knife",
+      "Change the advancement wheel",
+      "Change the band guides",
+    ]
+  },
+  {
+    ref: "8.3.9", title: "C Section — Photocell for Rejection Hole Detection",
+    icon: "🔦",
+    items: [
+      "Adjust the height of the photocell for the detection of the hole for rejection: the beam must be at the same height of the hole",
+    ]
+  },
+];
+
+// ============================================================
+// FORMAT CHANGE PAGE COMPONENT
+// ============================================================
+function FormatPage() {
+  const [input, setInput]           = React.useState("");
+  const [size, setSize]             = React.useState(null);
+  const [tab, setTab]               = React.useState("parts");
+  const [openTable, setOpenTable]   = React.useState(null);
+  const [openStep, setOpenStep]     = React.useState(null);
+  const [checked, setChecked]       = React.useState({});
+
+  const search = (val) => {
+    const v = String(val).trim();
+    if (SIZES[v]) { setSize(v); setInput(v); setTab("parts"); setOpenTable(null); setOpenStep(null); }
+    else { setSize(null); }
+  };
+
+  const toggleCheck = (i) => setChecked(p => ({ ...p, [i]: !p[i] }));
+  const doneCount = Object.values(checked).filter(Boolean).length;
+
+  const sizeInt = size ? parseInt(size) : null;
+  const sizeInfo = size ? SIZES[size] : null;
+  const applicableTables = sizeInt ? TABLES.filter(t => t.sizes.includes(sizeInt)) : [];
+  const sCode = size ? `s${size}` : null;
+
+  return (
+    <div className="max-w-3xl mx-auto px-4 py-4 pb-8">
+
+      {/* ── SEARCH HEADER ── */}
+      <div className="bg-slate-800/70 border border-slate-700/50 rounded-2xl p-4 mb-4">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xl">🔄</span>
+          <div>
+            <p className="text-white font-black text-sm">Size Format Change Guide</p>
+            <p className="text-slate-500 text-xs">Enter size number (1–5) → complete parts list + steps</p>
+          </div>
+        </div>
+        <div className="flex gap-2 mb-3">
+          <input
+            type="number" min="1" max="5" value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && search(input)}
+            placeholder="Enter size number 1 to 5"
+            className="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-orange-500"
+          />
+          <button onClick={() => search(input)}
+            className="bg-orange-500 hover:bg-orange-400 text-white font-black px-5 rounded-xl text-sm transition-colors">
+            GO
+          </button>
+        </div>
+        <div className="flex gap-1.5 flex-wrap">
+          {Object.entries(SIZES).map(([n, info]) => (
+            <button key={n} onClick={() => search(n)}
+              className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-all ${
+                size === n ? "bg-orange-500 border-orange-400 text-white"
+                           : "bg-slate-700/40 border-slate-600 text-slate-300 hover:border-orange-400"}`}>
+              Size {n} · {info.code} · {info.material}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* invalid */}
+      {input && !SIZES[input] && (
+        <div className="bg-red-950/50 border border-red-700/50 rounded-xl p-3 text-center mb-4">
+          <p className="text-red-400 font-bold text-sm">⚠️ Invalid — enter 1, 2, 3, 4 or 5 only</p>
+        </div>
+      )}
+
+      {/* ── RESULTS ── */}
+      {size && sizeInfo && (
+        <>
+          {/* Size badge */}
+          <div className="rounded-2xl border border-orange-700/30 bg-slate-800/50 p-4 mb-4 flex items-center gap-4">
+            <div className={`w-14 h-14 ${sizeInfo.bg} rounded-xl flex items-center justify-center text-white font-black text-2xl flex-shrink-0`}>{size}</div>
+            <div>
+              <p className="text-white font-black text-base">Size No.{size} — Code: <span className="text-orange-300">{sizeInfo.code}</span></p>
+              <p className="text-slate-400 text-xs mt-0.5">Part Number: <span className="text-green-400 font-mono">{sizeInfo.partNo}</span></p>
+              <p className="text-slate-400 text-xs">Material: <span className="text-cyan-300 font-bold">{sizeInfo.material}</span></p>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {[{id:"parts",l:"📦 Parts"},{id:"steps",l:"🔧 Steps"},{id:"prep",l:"⚙️ Prep"}].map(t => (
+              <button key={t.id} onClick={() => setTab(t.id)}
+                className={`py-2.5 rounded-xl text-xs font-black transition-all ${tab===t.id?"bg-orange-500 text-white":"bg-slate-800 text-slate-400 hover:bg-slate-700"}`}>
+                {t.l}
+              </button>
+            ))}
+          </div>
+
+          {/* ── PARTS TAB ── */}
+          {tab === "parts" && (
+            <div className="space-y-3">
+              <p className="text-slate-500 text-xs px-1">
+                Showing {applicableTables.length} tables applicable to Size {size} ({sizeInfo.code}).
+                Orange = size-specific part. Grey = common part (same for multiple sizes).
+              </p>
+              {applicableTables.map((table, ti) => {
+                const isOpen = openTable === ti;
+                const visibleParts = table.parts.filter(p => {
+                  const code = p[sCode];
+                  return code !== undefined && code !== "";
+                });
+                return (
+                  <div key={ti} className="rounded-xl border border-slate-700/40 overflow-hidden">
+                    <button
+                      onClick={() => setOpenTable(isOpen ? null : ti)}
+                      className="w-full flex items-center justify-between p-4 bg-slate-800/60 hover:bg-slate-700/60 transition-colors text-left">
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-mono">{table.tableRef} / {table.drawRef}</span>
+                          <span className="text-white font-bold text-sm">{table.title}</span>
+                        </div>
+                        <p className="text-slate-500 text-xs mt-0.5">{visibleParts.length} parts for Size {size} · {table.subtitle}</p>
+                      </div>
+                      <span className="text-slate-400 text-xl ml-3 flex-shrink-0">{isOpen ? "▲" : "▼"}</span>
+                    </button>
+
+                    {isOpen && (
+                      <div>
+                        {table.note && (
+                          <div className="px-4 py-2.5 bg-blue-950/40 border-b border-slate-700/30">
+                            <p className="text-blue-200 text-xs leading-relaxed">ℹ️ {table.note}</p>
+                          </div>
+                        )}
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-xs min-w-[480px]">
+                            <thead>
+                              <tr className="bg-slate-700/50 text-slate-400">
+                                <th className="px-3 py-2 text-left font-bold w-12">Pos.</th>
+                                <th className="px-3 py-2 text-left font-bold">Description</th>
+                                <th className="px-3 py-2 text-left font-bold w-20">Part No.</th>
+                                <th className="px-3 py-2 text-center font-bold w-12">Qty</th>
+                                <th className="px-3 py-2 text-center font-bold w-16">Size {size}<br/>Code</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {visibleParts.map((part, pi) => {
+                                const code = part[sCode];
+                                const isCommon = code === "Q" || code === "F" || code === "Q+" || code === "---";
+                                return (
+                                  <tr key={pi} className={`border-t border-slate-700/20 ${!isCommon ? "bg-orange-950/25" : pi%2===0?"bg-slate-800/20":""}`}>
+                                    <td className="px-3 py-2 text-slate-500 font-mono">{part.pos}</td>
+                                    <td className="px-3 py-2 text-slate-200 leading-snug">{part.desc}</td>
+                                    <td className="px-3 py-2 text-green-400 font-mono">{part.partNo}</td>
+                                    <td className="px-3 py-2 text-center text-slate-300">{part.qty}</td>
+                                    <td className="px-3 py-2 text-center">
+                                      <span className={`inline-block px-2 py-0.5 rounded-full font-black border text-xs ${
+                                        code === "---" ? "bg-slate-800 text-slate-500 border-slate-600"
+                                        : isCommon    ? "bg-slate-700/60 text-slate-300 border-slate-600"
+                                                      : "bg-orange-500/25 text-orange-300 border-orange-500/50"}`}>
+                                        {code}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                        <div className="px-4 py-2 border-t border-slate-700/30 flex gap-4 flex-wrap text-xs text-slate-500">
+                          <span><span className="inline-block w-3 h-3 rounded bg-slate-700/60 mr-1 align-middle"></span>Common part (same for multiple sizes)</span>
+                          <span><span className="inline-block w-3 h-3 rounded bg-orange-950/50 mr-1 align-middle"></span>Size-specific part</span>
+                          <span><span className="text-slate-500 mr-1">---</span>Not changed for this size</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* ── STEPS TAB ── */}
+          {tab === "steps" && (
+            <div className="space-y-2">
+              <p className="text-slate-500 text-xs px-1 mb-3">
+                Changeover procedures from handbook Chapter 8, sections 8.1–8.3.9. Tap to expand each station.
+              </p>
+              {STEPS.map((step, si) => {
+                const isOpen = openStep === si;
+                return (
+                  <div key={si} className="rounded-xl border border-slate-700/40 overflow-hidden">
+                    <button
+                      onClick={() => setOpenStep(isOpen ? null : si)}
+                      className="w-full flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-700/60 transition-colors text-left">
+                      <span className="text-lg flex-shrink-0">{step.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs text-slate-500 font-mono">{step.ref}</span>
+                        <p className="text-white font-bold text-sm leading-tight">{step.title}</p>
+                      </div>
+                      <span className="text-slate-400 text-lg flex-shrink-0">{isOpen?"▲":"▼"}</span>
+                    </button>
+                    {isOpen && (
+                      <div className="border-t border-slate-700/30 p-4">
+                        <ol className="space-y-3">
+                          {step.items.map((item, ii) => {
+                            const isWarn = item.startsWith("⚠️");
+                            return (
+                              <li key={ii} className="flex gap-3 items-start">
+                                <span className={`flex-shrink-0 w-6 h-6 rounded-full text-xs font-black flex items-center justify-center mt-0.5 ${isWarn?"bg-yellow-700/50 text-yellow-300":"bg-slate-700 text-slate-300"}`}>
+                                  {isWarn ? "!" : ii+1}
+                                </span>
+                                <p className={`text-xs leading-relaxed ${isWarn?"text-yellow-200 font-semibold":"text-slate-200"}`}>{item}</p>
+                              </li>
+                            );
+                          })}
+                        </ol>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* ── PREP TAB ── */}
+          {tab === "prep" && (
+            <div className="space-y-3">
+              <div className="bg-yellow-950/40 border border-yellow-700/40 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-yellow-300 font-black text-sm">⚠️ Machine Preparation Checklist</p>
+                  <span className="text-xs font-bold bg-yellow-900/50 text-yellow-300 px-2 py-1 rounded-full">{doneCount}/{PREP_STEPS.length} done</span>
+                </div>
+                <p className="text-slate-400 text-xs mb-3">Complete ALL steps before starting format change. Tap each to mark done.</p>
+                <div className="space-y-2">
+                  {PREP_STEPS.map((step, i) => (
+                    <button key={i} onClick={() => toggleCheck(i)}
+                      className={`w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${
+                        checked[i] ? "bg-green-950/40 border-green-700/40" : "bg-slate-800/40 border-slate-700/30 hover:border-yellow-600/40"}`}>
+                      <span className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-black ${
+                        checked[i] ? "bg-green-600 border-green-500 text-white" : "border-slate-500 text-slate-500"}`}>
+                        {checked[i] ? "✓" : i+1}
+                      </span>
+                      <p className={`text-xs leading-relaxed ${checked[i] ? "text-green-300 line-through opacity-70" : "text-slate-200"}`}>{step}</p>
+                    </button>
+                  ))}
+                </div>
+                {doneCount === PREP_STEPS.length && (
+                  <div className="mt-3 bg-green-900/40 border border-green-700/40 rounded-xl p-3 text-center">
+                    <p className="text-green-300 font-black">✅ All steps complete — safe to begin format change</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-blue-950/40 border border-blue-700/40 rounded-xl p-4">
+                <p className="text-blue-300 font-black text-sm mb-3">🔑 Tool Handles Required</p>
+                <div className="space-y-2">
+                  {[
+                    { code:"015040570", thread:"M6", use:"PVC mould dies" },
+                    { code:"551510155", thread:"M8", use:"ALU valve sealing and knurling dies" },
+                    { code:"015040750", thread:"M8", use:"Under-pump centring dies" },
+                  ].map((t,i) => (
+                    <div key={i} className="flex items-center gap-3 bg-slate-800/40 rounded-lg px-3 py-2">
+                      <span className="text-green-400 font-mono text-xs font-bold flex-shrink-0">{t.code}</span>
+                      <span className="text-slate-500 text-xs flex-shrink-0">({t.thread})</span>
+                      <span className="text-slate-300 text-xs ml-auto text-right">{t.use}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-red-950/30 border border-red-800/30 rounded-xl p-4">
+                <p className="text-red-300 font-black text-sm mb-2">🚨 Safety Warnings (Section 8.4)</p>
+                <ul className="space-y-1.5">
+                  {[
+                    "Pay attention when working on dies — if hot, there is burn danger",
+                    "Danger for overhanging parts during lifter use",
+                    "Caution: entanglement and shearing danger between dies during manual operation",
+                    "Module weight ~500kg — use transpallet with special support (supplied by SARONG)",
+                    "If format type selected on HMI does not match installed format, PLC will not work — always select correct format on HMI after changeover",
+                  ].map((w,i) => (
+                    <li key={i} className="flex gap-2 items-start">
+                      <span className="text-red-400 flex-shrink-0 mt-0.5">▸</span>
+                      <p className="text-slate-300 text-xs leading-relaxed">{w}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── DEFAULT — no size selected ── */}
+      {!size && !input && (
+        <div className="space-y-3">
+          <div className="rounded-xl border border-slate-700/30 overflow-hidden">
+            <div className="px-4 py-3 bg-slate-800/60 border-b border-slate-700/30">
+              <p className="text-white font-bold text-sm">All Available Sizes — SAAS 9 AP S/N 1577</p>
+              <p className="text-slate-500 text-xs mt-0.5">Tap any size to view its complete changeover guide</p>
+            </div>
+            {Object.entries(SIZES).map(([n, info]) => (
+              <button key={n} onClick={() => search(n)}
+                className="w-full flex items-center gap-4 px-4 py-3.5 border-b border-slate-700/20 last:border-0 hover:bg-slate-700/30 transition-colors text-left">
+                <div className={`w-10 h-10 ${info.bg} rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0`}>{n}</div>
+                <div className="flex-1">
+                  <p className="text-white font-bold text-sm">Size No.{n} — Code: {info.code}</p>
+                  <p className="text-slate-500 text-xs">{info.partNo} · {info.material}</p>
+                </div>
+                <span className="text-slate-500 text-lg">›</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="bg-slate-800/30 border border-slate-700/20 rounded-xl p-4">
+            <p className="text-slate-300 font-bold text-xs mb-1">📖 About the Format Tables</p>
+            <p className="text-slate-400 text-xs leading-relaxed">
+              The last 4 digits of the Ima-Sarong code number are stamped on each part, along with the letter of the main format it belongs to (Q, R, S, F or H).
+              Sizes 1–3 use PVC/VP format parts. Sizes 4–5 use ALU/VA format parts.
+              Common parts shared by multiple sizes carry the same code letter.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function APKGuide({ onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm" onClick={onClose}>
@@ -1267,7 +2007,255 @@ function APKGuide({ onClose }) {
 }
 
 // ============================================================
+// ============================================================
+// FORMAT CHANGE DATA - SAAS 9 AP S/N 1577
+// Source: Operator Handbook Chapter 8 (Size Format Change)
+// ============================================================
+const SIZE_MAP = {
+  "1": { code: "Q100124841", label: "Size 1 (Q)", material: "PVC / Plastic (VP)", color: "bg-purple-700 text-purple-100" },
+  "2": { code: "R100124851", label: "Size 2 (R)", material: "PVC / Plastic (VP)", color: "bg-purple-700 text-purple-100" },
+  "3": { code: "S100124861", label: "Size 3 (S)", material: "PVC / Plastic (VP)", color: "bg-purple-700 text-purple-100" },
+  "4": { code: "F100213631", label: "Size 4 (F)", material: "Aluminium (VA)", color: "bg-amber-700 text-amber-100" },
+  "5": { code: "H100213680", label: "Size 5 (H)", material: "Aluminium (VA)", color: "bg-amber-700 text-amber-100" },
+};
+
+const FORMAT_DATA = {
+  A_VP: {
+    section: "A Section – PVC/Plastic (VP)",
+    fig: "Fig. 82/83",
+    sizes: ["1","2","3"],
+    material: "VP",
+    color: "bg-purple-900/50 border-purple-700/50",
+    badgeColor: "bg-purple-700 text-purple-100",
+    procedure: [
+      "Deactivate all resistances — wait until temp falls to at least 30°C",
+      "Open the film mover grippers",
+      "Open the sealing, preheating and moulding dies",
+      "Disable the moulding blower",
+      "Open the under pump centring dies",
+      "Activate the 'Introduce A section film' command on HMI",
+      "Disconnect the pneumatic power supply (see pneumatic chart)",
+      "Use provided handles to take out the dies (code 015040570 M6 threading for PVC mould dies)"
+    ],
+    parts: [
+      { pos:"1",  desc:"Rear Sealing Die",                         part:"0200", qty:1,  sizes:{1:"Q",2:"R",3:"S"} },
+      { pos:"2",  desc:"Front Sealing Die",                        part:"0250", qty:1,  sizes:{1:"Q",2:"R",3:"S"} },
+        "Replace the film entrainment roll",
+      "Replace the guide for piling",
+      "Replace the guides spacer",
+      "Replace the lower contrast for capacitive sensor",
+      "Replace the guide adjustment template"
+    ],
+    parts: [
+      { pos:"1", desc:"Film Entrainment Roll",                   part:"0100", qty:1, sizes:{1:"Q",2:"R",3:"S",4:"F",5:"H"} },
+      { pos:"2", desc:"Guide for Piling",                        part:"0500", qty:1, sizes:{1:"Q",2:"Q",3:"Q",4:"Q",5:"Q"} },
+      { pos:"3", desc:"Guides Spacer",                           part:"0300", qty:1, sizes:{1:"Q",2:"Q",3:"Q",4:"F",5:"H"} },
+      { pos:"4", desc:"Lower Contrast for Capacitive Sensor",    part:"0900", qty:1, sizes:{1:"Q",2:"R",3:"S",4:"F",5:"H"} },
+      { pos:"5", desc:"Guide Adjustment Template",               part:"1100", qty:2, sizes:{1:"Q",2:"R",3:"S",4:"F",5:"H"} },
+    ]
+  }
+};
+
+// ============================================================
+// FORMAT CHANGE PAGE COMPONENT
+// ============================================================
+function FormatChangePage() {
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [inputSize, setInputSize] = useState("");
+  const [expandedSection, setExpandedSection] = useState(null);
+
+  const handleSearch = () => {
+    const s = inputSize.trim();
+    if (["1","2","3","4","5"].includes(s)) {
+      setSelectedSize(s);
+      setExpandedSection(null);
+    }
+  };
+
+  const sizeInfo = selectedSize ? SIZE_MAP[selectedSize] : null;
+
+  // Get relevant sections for selected size
+  const relevantSections = selectedSize
+    ? Object.entries(FORMAT_DATA).filter(([,v]) => v.sizes.includes(selectedSize))
+    : [];
+
+  // Get parts that apply to this size
+  const getPartsForSize = (parts, sizeNum) => {
+    return parts.filter(p => p.sizes[sizeNum]);
+  };
+
+  const isUnique = (part, sizeNum, allParts) => {
+    // Check if this part code is unique to this size or shared
+    const sizeCode = part.sizes[sizeNum];
+    const otherSizesWithSameCode = Object.entries(part.sizes)
+      .filter(([k,v]) => k !== sizeNum && v === sizeCode);
+    return otherSizesWithSameCode.length === 0;
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto px-4 py-4">
+      {/* Header */}
+      <div className="bg-slate-800/60 rounded-xl border border-slate-700/50 p-4 mb-4">
+        <h2 className="text-white font-black text-base mb-1">🔄 Size Format Change Guide</h2>
+        <p className="text-slate-400 text-xs mb-3">Enter size number to see all parts and procedures required for that format changeover.</p>
+
+        {/* Size selector */}
+        <div className="flex gap-2 mb-3">
+          <input
+            type="number" min="1" max="5"
+            value={inputSize}
+            onChange={e => setInputSize(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleSearch()}
+            placeholder="Enter size no. (1-5)"
+            className="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-orange-500"
+          />
+          <button
+            onClick={handleSearch}
+            className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors"
+          >
+            Search
+          </button>
+        </div>
+
+        {/* Quick size buttons */}
+        <div className="flex gap-2 flex-wrap">
+          {Object.entries(SIZE_MAP).map(([num, info]) => (
+            <button
+              key={num}
+              onClick={() => { setSelectedSize(num); setInputSize(num); setExpandedSection(null); }}
+              className={`text-xs font-bold px-3 py-1.5 rounded-full transition-all ${
+                selectedSize === num ? info.color : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+              }`}
+            >
+              {info.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Results */}
+      {selectedSize && sizeInfo && (
+        <div>
+          {/* Size info card */}
+          <div className={`rounded-xl border p-4 mb-4 ${sizeInfo.color}`}>
+            <div className="flex items-center gap-3">
+              <div className="text-3xl font-black text-white">#{selectedSize}</div>
+              <div>
+                <div className="text-white font-black text-base">{sizeInfo.label}</div>
+                <div className="text-slate-300 text-xs">Format Code: <span className="font-mono text-white">{sizeInfo.code}</span></div>
+                <div className="text-slate-300 text-xs">Material: <span className="text-white font-bold">{sizeInfo.material}</span></div>
+              </div>
+              <div className="ml-auto">
+                <div className="text-slate-400 text-xs">{relevantSections.length} sections</div>
+                <div className="text-slate-400 text-xs">to change</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Safety warning */}
+          <div className="bg-red-950/60 border border-red-700/50 rounded-xl p-3 mb-4">
+            <p className="text-red-300 text-xs font-bold">⚠️ SAFETY — Before starting format change:</p>
+            <ul className="text-red-200 text-xs mt-1 space-y-0.5">
+              <li>• Mechanical maintenance personnel only — dangerous for unqualified personnel</li>
+              <li>• Deactivate resistances and wait until temperature falls to at least 30°C</li>
+              <li>• Disconnect pneumatic power supply before working on dies</li>
+              <li>• Be careful of overhead loads while using the hoist</li>
+              <li>• Danger of crushing between dies during manual operation</li>
+            </ul>
+          </div>
+
+          {/* Sections */}
+          {relevantSections.map(([key, secData]) => {
+            const sectionParts = getPartsForSize(secData.parts, selectedSize);
+            const isExpanded = expandedSection === key;
+
+            return (
+              <div key={key} className={`rounded-xl border mb-3 overflow-hidden ${secData.color}`}>
+                {/* Section header */}
+                <button
+                  className="w-full p-4 flex items-center gap-3 text-left"
+                  onClick={() => setExpandedSection(isExpanded ? null : key)}
+                >
+                  <span className={`text-xs font-bold px-2 py-1 rounded-full flex-shrink-0 ${secData.badgeColor}`}>
+                    {secData.fig}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white font-bold text-sm">{secData.section}</div>
+                    <div className="text-slate-400 text-xs">{sectionParts.length} parts to change</div>
+                  </div>
+                  <span className="text-slate-400 text-lg">{isExpanded ? "▲" : "▼"}</span>
+                </button>
+
+                {isExpanded && (
+                  <div className="px-4 pb-4">
+                    {/* Procedure */}
+                    <div className="mb-3">
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">📋 Procedure</h4>
+                      <div className="space-y-1.5">
+                        {secData.procedure.map((step, i) => (
+                          <div key={i} className="flex gap-2">
+                            <span className="text-orange-400 text-xs font-bold flex-shrink-0 mt-0.5">
+                              {step.startsWith("⚠️") || step.startsWith("IMPORTANT") || step.startsWith("NOTE") ? "" : `${i+1}.`}
+                            </span>
+                            <p className={`text-xs leading-relaxed ${step.startsWith("⚠️") || step.startsWith("IMPORTANT") ? "text-yellow-300 font-bold" : "text-slate-200"}`}>
+                              {step}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Parts list */}
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">🔩 Parts to Replace</h4>
+                      <div className="space-y-1.5">
+                        {sectionParts.map((part, i) => {
+                          const partCode = part.sizes[selectedSize];
+                          const isShared = Object.values(part.sizes).filter(v => v === partCode).length > 1;
+                          return (
+                            <div key={i} className="bg-slate-900/60 rounded-lg px-3 py-2 flex items-center gap-2">
+                              <span className="text-slate-500 text-xs font-mono w-8 flex-shrink-0">#{part.pos}</span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-slate-200 text-xs leading-snug">{part.desc}</p>
+                                <p className="text-slate-500 text-xs font-mono">Part: {part.part} · Qty: {part.qty}</p>
+                              </div>
+                              <div className="flex-shrink-0 text-right">
+                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                                  isShared ? "bg-slate-700 text-slate-300" : "bg-orange-900/60 text-orange-300"
+                                }`}>
+                                  {partCode}
+                                  {!isShared && <span className="ml-1 text-orange-400">★</span>}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <p className="text-slate-600 text-xs mt-2">★ = Part unique to this size</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {!selectedSize && (
+        <div className="text-center py-12">
+          <p className="text-4xl mb-3">🔄</p>
+          <p className="text-slate-400 text-sm font-bold">Enter a size number (1–5) to see the full format change guide</p>
+          <p className="text-slate-600 text-xs mt-2">Sizes 1-3 = PVC/Plastic (VP) · Sizes 4-5 = Aluminium (VA)</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function App() {
+  const [page, setPage] = useState("alarms"); // "alarms" or "format"
+  const [page, setPage] = useState("alarms"); // "alarms" | "format"
   const [search, setSearch] = useState("");
   const [section, setSection] = useState("ALL");
   const [stopFilter, setStopFilter] = useState("ALL");
@@ -1311,7 +2299,7 @@ function App() {
   const selectedAlarm = selected ? ALARMS[selected] : null;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white" style={{fontFamily:"'Courier New',monospace"}}>
+    <div className="min-h-screen bg-slate-950 text-white pb-16" style={{fontFamily:"'Courier New',monospace"}}>
 
       {/* Header */}
       <div className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-xl">
@@ -1321,14 +2309,30 @@ function App() {
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-lg font-black shadow-lg flex-shrink-0">⚠</div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-white font-black text-base leading-tight tracking-tight">SAAS 9 AP · Alarm Reference</h1>
-              <p className="text-slate-500 text-xs">S/N 1577 · Aspen · {Object.keys(ALARMS).length} alarms</p>
+              <h1 className="text-white font-black text-base leading-tight tracking-tight">SAAS 9 AP</h1>
+              <p className="text-slate-500 text-xs">S/N 1577 · Aspen</p>
             </div>
             <button
               onClick={() => setShowAPK(true)}
               className="flex-shrink-0 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs px-3 py-2 rounded-xl transition-colors"
             >
               📱 APK
+            </button>
+          </div>
+
+          {/* Page tabs */}
+          <div className="flex gap-2 mb-3">
+            <button
+              onClick={() => setPage("alarms")}
+              className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${page === "alarms" ? "bg-orange-500 text-white" : "bg-slate-800 text-slate-400 hover:bg-slate-700"}`}
+            >
+              🚨 Alarms ({Object.keys(ALARMS).length})
+            </button>
+            <button
+              onClick={() => setPage("format")}
+              className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${page === "format" ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-400 hover:bg-slate-700"}`}
+            >
+              🔄 Format Change
             </button>
           </div>
 
@@ -1401,7 +2405,7 @@ function App() {
       </div>
 
       {/* Content */}
-      <div className="max-w-3xl mx-auto px-4 py-4">
+      {page === "format" ? <FormatChangePage /> : <div className="max-w-3xl mx-auto px-4 py-4">
         {filtered.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-5xl mb-4">🔍</p>
@@ -1429,9 +2433,47 @@ function App() {
       {/* APK guide modal */}
       {showAPK && <APKGuide onClose={() => setShowAPK(false)} />}
 
+      </div>}
+
+      </div>}
+
       {/* Footer */}
-      <div className="text-center py-6 text-slate-700 text-xs border-t border-slate-900 mt-4">
-        SAAS 9 AP · S/N 1577 · Operator Handbook Rev 1.0.0 · March 2025 · {Object.keys(ALARMS).length} alarms
+      {page === "alarms" && (
+        <div className="text-center py-6 text-slate-700 text-xs border-t border-slate-900 mt-4">
+          SAAS 9 AP · S/N 1577 · Operator Handbook Rev 1.0.0 · March 2025 · {Object.keys(ALARMS).length} alarms
+        </div>
+      )}
+
+      {/* Format Change Page */}
+      {page === "format" && <FormatPage />}
+
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900 border-t border-slate-700 flex">
+        <button
+          onClick={() => setPage("alarms")}
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-all ${
+            page === "alarms" ? "text-orange-400" : "text-slate-500 hover:text-slate-300"
+          }`}
+        >
+          <span className="text-xl">⚠️</span>
+          <span className="text-xs font-bold">Alarms</span>
+        </button>
+        <button
+          onClick={() => setPage("format")}
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-all ${
+            page === "format" ? "text-orange-400" : "text-slate-500 hover:text-slate-300"
+          }`}
+        >
+          <span className="text-xl">🔄</span>
+          <span className="text-xs font-bold">Format Change</span>
+        </button>
+        <button
+          onClick={() => setShowAPK(true)}
+          className="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-slate-500 hover:text-slate-300 transition-all"
+        >
+          <span className="text-xl">📱</span>
+          <span className="text-xs font-bold">APK Guide</span>
+        </button>
       </div>
     </div>
   );
