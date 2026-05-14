@@ -1181,7 +1181,7 @@ function AlarmDetail({ num, alarm, onClose }) {
                     let bg = "bg-emerald-950/50 border-emerald-800/40";
                     if (isScenario) bg = "bg-blue-950/60 border-blue-800/40";
                     if (isAlso || isNote) bg = "bg-slate-800/60 border-slate-700/40";
-                    const header = line.match(/^(Step \d+:|FOR SCENARIO [AB]:|Also check:|Note:)/)?.[1] || "";
+                    const headerMatch = line.match(/^(Step \d+:|FOR SCENARIO [AB]:|Also check:|Note:)/); const header = headerMatch ? headerMatch[1] : "";
                     const body = header ? line.slice(header.length).trim() : line.trim();
                     return (
                       <div key={i} className={`rounded-xl p-3 border ${bg}`}>
@@ -2059,198 +2059,6 @@ const FORMAT_DATA = {
 // ============================================================
 // FORMAT CHANGE PAGE COMPONENT
 // ============================================================
-function FormatChangePage() {
-  const [selectedSize, setSelectedSize] = useState(null);
-  const [inputSize, setInputSize] = useState("");
-  const [expandedSection, setExpandedSection] = useState(null);
-
-  const handleSearch = () => {
-    const s = inputSize.trim();
-    if (["1","2","3","4","5"].includes(s)) {
-      setSelectedSize(s);
-      setExpandedSection(null);
-    }
-  };
-
-  const sizeInfo = selectedSize ? SIZE_MAP[selectedSize] : null;
-
-  // Get relevant sections for selected size
-  const relevantSections = selectedSize
-    ? Object.entries(FORMAT_DATA).filter(([,v]) => v.sizes.includes(selectedSize))
-    : [];
-
-  // Get parts that apply to this size
-  const getPartsForSize = (parts, sizeNum) => {
-    return parts.filter(p => p.sizes[sizeNum]);
-  };
-
-  const isUnique = (part, sizeNum, allParts) => {
-    // Check if this part code is unique to this size or shared
-    const sizeCode = part.sizes[sizeNum];
-    const otherSizesWithSameCode = Object.entries(part.sizes)
-      .filter(([k,v]) => k !== sizeNum && v === sizeCode);
-    return otherSizesWithSameCode.length === 0;
-  };
-
-  return (
-    <div className="max-w-3xl mx-auto px-4 py-4">
-      {/* Header */}
-      <div className="bg-slate-800/60 rounded-xl border border-slate-700/50 p-4 mb-4">
-        <h2 className="text-white font-black text-base mb-1">🔄 Size Format Change Guide</h2>
-        <p className="text-slate-400 text-xs mb-3">Enter size number to see all parts and procedures required for that format changeover.</p>
-
-        {/* Size selector */}
-        <div className="flex gap-2 mb-3">
-          <input
-            type="number" min="1" max="5"
-            value={inputSize}
-            onChange={e => setInputSize(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleSearch()}
-            placeholder="Enter size no. (1-5)"
-            className="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-orange-500"
-          />
-          <button
-            onClick={handleSearch}
-            className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors"
-          >
-            Search
-          </button>
-        </div>
-
-        {/* Quick size buttons */}
-        <div className="flex gap-2 flex-wrap">
-          {Object.entries(SIZE_MAP).map(([num, info]) => (
-            <button
-              key={num}
-              onClick={() => { setSelectedSize(num); setInputSize(num); setExpandedSection(null); }}
-              className={`text-xs font-bold px-3 py-1.5 rounded-full transition-all ${
-                selectedSize === num ? info.color : "bg-slate-700 text-slate-300 hover:bg-slate-600"
-              }`}
-            >
-              {info.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Results */}
-      {selectedSize && sizeInfo && (
-        <div>
-          {/* Size info card */}
-          <div className={`rounded-xl border p-4 mb-4 ${sizeInfo.color}`}>
-            <div className="flex items-center gap-3">
-              <div className="text-3xl font-black text-white">#{selectedSize}</div>
-              <div>
-                <div className="text-white font-black text-base">{sizeInfo.label}</div>
-                <div className="text-slate-300 text-xs">Format Code: <span className="font-mono text-white">{sizeInfo.code}</span></div>
-                <div className="text-slate-300 text-xs">Material: <span className="text-white font-bold">{sizeInfo.material}</span></div>
-              </div>
-              <div className="ml-auto">
-                <div className="text-slate-400 text-xs">{relevantSections.length} sections</div>
-                <div className="text-slate-400 text-xs">to change</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Safety warning */}
-          <div className="bg-red-950/60 border border-red-700/50 rounded-xl p-3 mb-4">
-            <p className="text-red-300 text-xs font-bold">⚠️ SAFETY — Before starting format change:</p>
-            <ul className="text-red-200 text-xs mt-1 space-y-0.5">
-              <li>• Mechanical maintenance personnel only — dangerous for unqualified personnel</li>
-              <li>• Deactivate resistances and wait until temperature falls to at least 30°C</li>
-              <li>• Disconnect pneumatic power supply before working on dies</li>
-              <li>• Be careful of overhead loads while using the hoist</li>
-              <li>• Danger of crushing between dies during manual operation</li>
-            </ul>
-          </div>
-
-          {/* Sections */}
-          {relevantSections.map(([key, secData]) => {
-            const sectionParts = getPartsForSize(secData.parts, selectedSize);
-            const isExpanded = expandedSection === key;
-
-            return (
-              <div key={key} className={`rounded-xl border mb-3 overflow-hidden ${secData.color}`}>
-                {/* Section header */}
-                <button
-                  className="w-full p-4 flex items-center gap-3 text-left"
-                  onClick={() => setExpandedSection(isExpanded ? null : key)}
-                >
-                  <span className={`text-xs font-bold px-2 py-1 rounded-full flex-shrink-0 ${secData.badgeColor}`}>
-                    {secData.fig}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-white font-bold text-sm">{secData.section}</div>
-                    <div className="text-slate-400 text-xs">{sectionParts.length} parts to change</div>
-                  </div>
-                  <span className="text-slate-400 text-lg">{isExpanded ? "▲" : "▼"}</span>
-                </button>
-
-                {isExpanded && (
-                  <div className="px-4 pb-4">
-                    {/* Procedure */}
-                    <div className="mb-3">
-                      <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">📋 Procedure</h4>
-                      <div className="space-y-1.5">
-                        {secData.procedure.map((step, i) => (
-                          <div key={i} className="flex gap-2">
-                            <span className="text-orange-400 text-xs font-bold flex-shrink-0 mt-0.5">
-                              {step.startsWith("⚠️") || step.startsWith("IMPORTANT") || step.startsWith("NOTE") ? "" : `${i+1}.`}
-                            </span>
-                            <p className={`text-xs leading-relaxed ${step.startsWith("⚠️") || step.startsWith("IMPORTANT") ? "text-yellow-300 font-bold" : "text-slate-200"}`}>
-                              {step}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Parts list */}
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">🔩 Parts to Replace</h4>
-                      <div className="space-y-1.5">
-                        {sectionParts.map((part, i) => {
-                          const partCode = part.sizes[selectedSize];
-                          const isShared = Object.values(part.sizes).filter(v => v === partCode).length > 1;
-                          return (
-                            <div key={i} className="bg-slate-900/60 rounded-lg px-3 py-2 flex items-center gap-2">
-                              <span className="text-slate-500 text-xs font-mono w-8 flex-shrink-0">#{part.pos}</span>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-slate-200 text-xs leading-snug">{part.desc}</p>
-                                <p className="text-slate-500 text-xs font-mono">Part: {part.part} · Qty: {part.qty}</p>
-                              </div>
-                              <div className="flex-shrink-0 text-right">
-                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                                  isShared ? "bg-slate-700 text-slate-300" : "bg-orange-900/60 text-orange-300"
-                                }`}>
-                                  {partCode}
-                                  {!isShared && <span className="ml-1 text-orange-400">★</span>}
-                                </span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      <p className="text-slate-600 text-xs mt-2">★ = Part unique to this size</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {!selectedSize && (
-        <div className="text-center py-12">
-          <p className="text-4xl mb-3">🔄</p>
-          <p className="text-slate-400 text-sm font-bold">Enter a size number (1–5) to see the full format change guide</p>
-          <p className="text-slate-600 text-xs mt-2">Sizes 1-3 = PVC/Plastic (VP) · Sizes 4-5 = Aluminium (VA)</p>
-        </div>
-      )}
-    </div>
-  );
-}
 
 
 function App() {
@@ -2405,7 +2213,7 @@ function App() {
       </div>
 
       {/* Content */}
-      {page === "format" ? <FormatChangePage /> : <div className="max-w-3xl mx-auto px-4 py-4">
+      {page === "format" ? <FormatPage /> : <div className="max-w-3xl mx-auto px-4 py-4">
         {filtered.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-5xl mb-4">🔍</p>
