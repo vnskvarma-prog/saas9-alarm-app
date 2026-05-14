@@ -1808,7 +1808,7 @@ function App() {
 
     // ── DEVELOPER CREDIT ──
     React.createElement("div", {className:"text-center py-4 px-4 border-t border-slate-800/50"},
-      React.createElement("p", {className:"text-slate-600 text-xs"}, "SAAS 9 AP · S/N 1577 · Aspen Pharmacare"),
+      React.createElement("p", {className:"text-slate-600 text-xs"}, "SAAS 9 AP · S/N 1577 · Alphamed Formulations Pvt Ltd, Hyd"),
       React.createElement("p", {className:"text-slate-500 text-xs mt-1 font-bold"}, "Developed by Dr. Naga Sravan Kumar Varma Vegesna")
     ),
 
