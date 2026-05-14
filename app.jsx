@@ -1,8 +1,4 @@
-// ============================================================
-// COMPLETE ALARM DATABASE - SAAS 9 AP S/N 1577
-// Source: Operator's Handbook Rev 1.0.0 (March 2025)
-// 172 alarms across LINE, REEL, FORM, DOSE, TANK, COOL, SEAL, CUT
-// ============================================================
+// ── CONSTANTS ──────────────────────────────────────────────
 const ALARMS = {
   "1000": { s:"LINE", c:"YELLOW", st:"END OF CYCLE", p:"OPERATOR", by:"NO",
     n:"STOP BUTTON PRESSED",
@@ -957,294 +953,6 @@ const ALARMS = {
 
 };
 
-
-// ============================================================
-const SECTION_COLORS = {
-  LINE: { badge:"bg-blue-700 text-blue-100",   dot:"bg-blue-400"    },
-  REEL: { badge:"bg-indigo-700 text-indigo-100", dot:"bg-indigo-400"  },
-  FORM: { badge:"bg-purple-700 text-purple-100", dot:"bg-purple-400"  },
-  DOSE: { badge:"bg-orange-700 text-orange-100", dot:"bg-orange-400"  },
-  TANK: { badge:"bg-teal-700 text-teal-100",    dot:"bg-teal-400"    },
-  COOL: { badge:"bg-cyan-700 text-cyan-100",    dot:"bg-cyan-400"    },
-  SEAL: { badge:"bg-green-700 text-green-100",  dot:"bg-green-400"   },
-  CUT:  { badge:"bg-rose-700 text-rose-100",    dot:"bg-rose-400"    },
-  CT1:  { badge:"bg-yellow-700 text-yellow-100", dot:"bg-yellow-400" },
-};
-
-const STOP_STYLE = {
-  "END OF CYCLE":    "bg-yellow-900/40 text-yellow-300 border-yellow-700/40",
-  "IMMEDIATE STOP":  "bg-red-900/40 text-red-300 border-red-700/40",
-  "PREVENTED START": "bg-orange-900/40 text-orange-300 border-orange-700/40",
-  "NO STOP":         "bg-slate-700/40 text-slate-400 border-slate-600/40",
-};
-
-const PERSONNEL_ICON = {
-  "OPERATOR": "👷",
-  "SKILLED OPERATOR": "🔧",
-  "MECHANICAL TECHNICIAN": "⚙️",
-  "ELECTRICAL TECHNICIAN": "⚡",
-};
-
-// ============================================================
-// APK INSTRUCTIONS DATA
-// ============================================================
-const APK_STEPS = [
-  {
-    title: "Prerequisites",
-    icon: "📦",
-    steps: [
-      "Install Node.js (v18+) from nodejs.org",
-      "Install Android Studio from developer.android.com/studio",
-      "In Android Studio → SDK Manager → install Android SDK (API 33+) and Android Build Tools",
-      "Set environment variable: ANDROID_HOME = path to your Android SDK folder",
-    ]
-  },
-  {
-    title: "Create React Native Project",
-    icon: "⚛️",
-    code: `npx react-native@latest init SAAS9AlarmApp
-cd SAAS9AlarmApp`,
-    steps: [
-      "This creates a new React Native project with Android and iOS folders",
-      "Replace the App.tsx content with your alarm app code",
-      "Copy the ALARMS data object into your app",
-    ]
-  },
-  {
-    title: "Add Required Libraries",
-    icon: "📚",
-    code: `npm install @react-native-async-storage/async-storage
-npm install react-native-vector-icons
-npx pod-install   # iOS only`,
-    steps: [
-      "These add storage and icon support to the app",
-    ]
-  },
-  {
-    title: "Generate Debug APK",
-    icon: "🔨",
-    code: `cd android
-./gradlew assembleDebug`,
-    steps: [
-      "Wait 3–5 minutes for the build to complete",
-      "APK location: android/app/build/outputs/apk/debug/app-debug.apk",
-      "Transfer this APK to your Android phone via USB or email",
-      "On your phone: Settings → Install unknown apps → Allow",
-      "Tap the APK to install",
-    ]
-  },
-  {
-    title: "Generate Release APK (for distribution)",
-    icon: "🚀",
-    code: `# First generate a keystore:
-keytool -genkeypair -v -storetype PKCS12 \\
-  -keystore saas9.keystore -alias saas9key \\
-  -keyalg RSA -keysize 2048 -validity 10000
-
-# Then build release:
-cd android
-./gradlew assembleRelease`,
-    steps: [
-      "APK location: android/app/build/outputs/apk/release/app-release.apk",
-      "This APK can be shared with all operators",
-      "For Play Store: use 'bundleRelease' instead to generate .aab",
-    ]
-  },
-  {
-    title: "Easiest Alternative: PWA (No APK needed!)",
-    icon: "🌐",
-    steps: [
-      "Host this React app on any website (GitHub Pages, Netlify, Vercel — all free)",
-      "On Android phone: open Chrome → visit the URL → tap the 3-dot menu → 'Add to Home Screen'",
-      "The app will appear as an icon on your phone — works offline too!",
-      "This is FASTER than building an APK and works on any device",
-    ],
-    highlight: true
-  },
-  {
-    title: "Expo (Simplest APK Method)",
-    icon: "📱",
-    code: `npx create-expo-app SAAS9AlarmApp
-cd SAAS9AlarmApp
-# Add your code to App.js
-npx expo run:android   # needs Android Studio
-# OR use Expo Go app to test instantly`,
-    steps: [
-      "Expo handles all Android setup automatically",
-      "Use 'eas build' for cloud APK builds without needing Android Studio",
-      "Install EAS CLI: npm install -g eas-cli",
-      "Then: eas build --platform android --profile preview",
-    ]
-  }
-];
-
-// ============================================================
-function Badge({ label, className }) {
-  return <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${className}`}>{label}</span>;
-}
-
-function AlarmCard({ alarm, num, onClick }) {
-  const sec = SECTION_COLORS[alarm.s] || SECTION_COLORS.LINE;
-  const isRed = alarm.c === "RED";
-  const isGreen = alarm.c === "GREEN";
-  return (
-    <button
-      onClick={() => onClick(num)}
-      className={`w-full text-left rounded-xl border p-4 transition-all duration-150 hover:scale-[1.015] active:scale-[0.99] cursor-pointer
-        ${isRed ? "bg-red-950/70 border-red-800/50 hover:border-red-500" :
-          isGreen ? "bg-emerald-950/40 border-emerald-900/50 hover:border-emerald-600" :
-          "bg-slate-800/60 border-slate-700/40 hover:border-yellow-500/50"}`}
-    >
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <Badge label={alarm.s} className={sec.badge} />
-          <span className={`font-mono text-sm font-black ${isRed ? "text-red-400" : isGreen ? "text-emerald-400" : "text-yellow-400"}`}>
-            {isRed ? "🔴" : isGreen ? "🟢" : "🟡"} {num}
-          </span>
-        </div>
-        <span className={`text-xs px-1.5 py-0.5 rounded border whitespace-nowrap ${STOP_STYLE[alarm.st] || ""}`}>
-          {alarm.st === "IMMEDIATE STOP" ? "⛔ IMMED." : alarm.st === "END OF CYCLE" ? "🔄 EOC" : alarm.st === "PREVENTED START" ? "🚫 NO START" : "✅ NO STOP"}
-        </span>
-      </div>
-      <p className="text-white font-semibold text-sm leading-snug">{alarm.n}</p>
-      {alarm.d && <p className="text-slate-400 text-xs mt-1 line-clamp-2">{alarm.d}</p>}
-    </button>
-  );
-}
-
-function AlarmDetail({ num, alarm, onClose }) {
-  const sec = SECTION_COLORS[alarm.s] || SECTION_COLORS.LINE;
-  const isRed = alarm.c === "RED";
-  const isGreen = alarm.c === "GREEN";
-
-  // Parse fix steps
-  const fixLines = alarm.f
-    ? alarm.f.split(/(?=Step \d+:|FOR SCENARIO [AB]:|Also check:|Note:)/).filter(s => s.trim())
-    : [];
-  const hasStructuredSteps = alarm.f && (alarm.f.includes("Step") || alarm.f.includes("SCENARIO"));
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm" onClick={onClose}>
-      <div
-        className="w-full sm:max-w-2xl max-h-[94vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className={`p-5 sticky top-0 z-10 rounded-t-2xl border-b border-slate-700 ${isRed ? "bg-red-950" : isGreen ? "bg-emerald-950/80" : "bg-slate-800"}`}>
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <Badge label={alarm.s} className={sec.badge} />
-                <span className={`font-mono font-black text-3xl ${isRed ? "text-red-400" : isGreen ? "text-emerald-400" : "text-yellow-400"}`}>{num}</span>
-                <span className={`text-xs px-2 py-1 rounded-lg border ${STOP_STYLE[alarm.st] || ""}`}>{alarm.st}</span>
-              </div>
-              <h2 className="text-white font-black text-base leading-snug">{alarm.n}</h2>
-            </div>
-            <button onClick={onClose} className="flex-shrink-0 text-slate-400 hover:text-white text-2xl w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-700">✕</button>
-          </div>
-          <div className="flex flex-wrap gap-2 mt-3">
-            <span className="text-xs bg-slate-700/80 text-slate-300 px-2 py-1 rounded-full">
-              {PERSONNEL_ICON[alarm.p] || "👷"} {alarm.p}
-            </span>
-            <span className={`text-xs px-2 py-1 rounded-full ${isRed ? "bg-red-800/80 text-red-200" : isGreen ? "bg-emerald-800/80 text-emerald-200" : "bg-yellow-900/60 text-yellow-300"}`}>
-              {isRed ? "🔴 RED LAMP" : isGreen ? "🟢 GREEN LAMP" : "🟡 YELLOW LAMP"}
-            </span>
-            {alarm.by === "YES" && (
-              <span className="text-xs bg-blue-900/60 text-blue-300 px-2 py-1 rounded-full">🔑 Bypass with Key</span>
-            )}
-          </div>
-        </div>
-
-        {/* Body */}
-        <div className="p-5 space-y-4">
-          {/* Description */}
-          {alarm.d && (
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">📋 What It Means</h3>
-              <div className="bg-slate-800/60 rounded-xl p-4 border border-slate-700/50">
-                <p className="text-slate-200 text-sm leading-relaxed">{alarm.d}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Fix */}
-          {alarm.f && (
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">🔧 How to Fix</h3>
-              {hasStructuredSteps ? (
-                <div className="space-y-2">
-                  {fixLines.map((line, i) => {
-                    const isScenario = line.startsWith("FOR SCENARIO");
-                    const isStep = line.match(/^Step \d+:/);
-                    const isAlso = line.startsWith("Also check:");
-                    const isNote = line.startsWith("Note:");
-                    let bg = "bg-emerald-950/50 border-emerald-800/40";
-                    if (isScenario) bg = "bg-blue-950/60 border-blue-800/40";
-                    if (isAlso || isNote) bg = "bg-slate-800/60 border-slate-700/40";
-                    const headerMatch = line.match(/^(Step \d+:|FOR SCENARIO [AB]:|Also check:|Note:)/); const header = headerMatch ? headerMatch[1] : "";
-                    const body = header ? line.slice(header.length).trim() : line.trim();
-                    return (
-                      <div key={i} className={`rounded-xl p-3 border ${bg}`}>
-                        {header && <span className="text-xs font-black text-emerald-400 block mb-1">{isScenario ? "🔵 " : isAlso ? "💡 " : "✅ "}{header}</span>}
-                        <p className="text-slate-200 text-sm leading-relaxed">{body}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="bg-emerald-950/50 border border-emerald-800/40 rounded-xl p-4">
-                  <p className="text-slate-200 text-sm leading-relaxed">{alarm.f}</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {!alarm.d && !alarm.f && (
-            <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 text-center">
-              <p className="text-slate-400 text-sm">Refer to Chapter 9 of the SAAS 9 AP Operator Handbook (Rev 1.0.0) for full details on this alarm.</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-// ============================================================
-// FORMAT CHANGE PAGE COMPONENT
-// ============================================================
-
-
-// ============================================================
-
-// ============================================================
-// SIZE FORMAT CHANGE — SAAS 9 AP S/N 1577
-// Source: Chapter 8, Operator Handbook Rev 1.0.0 (March 2025)
-// Data verified line-by-line from PDF pages 233–245
-//
-// SIZES:
-//   Size 1 = Code Q = Part# Q100124841  (PVC/VP)
-//   Size 2 = Code R = Part# R100124851  (PVC/VP)
-//   Size 3 = Code S = Part# S100124861  (PVC/VP)
-//   Size 4 = Code F = Part# F100213631  (ALU/VA)
-//   Size 5 = Code H = Part# H100213680  (ALU/VA)
-//
-// FIGURE MAP (from handbook):
-//   Fig.82 = diagram for PVC A-Section table    (table data below, fig ref on page 234)
-//   Fig.83 = drawing of PVC A-Section parts     (diagram only page 235)
-//   Fig.84 = diagram for ALU A-Section table    (table data below, fig ref on page 236)
-//   Fig.85 = drawing of ALU A-Section parts     (diagram only page 237)
-//   Fig.88 = diagram for B-Section table        (table data below, fig ref on page 238)
-//   Fig.89 = drawing of B-Section parts         (diagram only page 239)
-//   Fig.90 = diagram for PVC C-Section table    (table data below, fig ref on page 240)
-//   Fig.91 = drawing of PVC C-Section parts     (diagram only page 241)
-//   Fig.92 = diagram for ALU C-Section table    (table data below, fig ref on page 242)
-//   Fig.93 = drawing of ALU C-Section parts     (diagram only page 243)
-//   Fig.94 = diagram for CT1 Connection table   (table data below, fig ref on page 244)
-//   Fig.95 = drawing of CT1 Connection parts    (diagram only page 245)
-// ============================================================
-
 const SIZES = {
   "1": { code:"Q", partNo:"Q100124841", material:"PVC (VP)", bg:"bg-blue-700" },
   "2": { code:"R", partNo:"R100124851", material:"PVC (VP)", bg:"bg-indigo-700" },
@@ -1252,18 +960,6 @@ const SIZES = {
   "4": { code:"F", partNo:"F100213631", material:"ALU (VA)", bg:"bg-amber-700" },
   "5": { code:"H", partNo:"H100213680", material:"ALU (VA)", bg:"bg-orange-700" },
 };
-
-// Each TABLE entry:
-//   tableRef  = the table reference figure shown at bottom of data page (e.g. "fig.82")
-//   drawRef   = the full drawing figure on the next page (e.g. "fig.83")
-//   title     = section description
-//   section   = "A" | "B" | "C" | "CT1"
-//   sizes     = which size numbers this table applies to
-//   note      = important notes
-//   parts     = array of part rows, EXACTLY as in PDF
-//     Each part: { pos, desc, partNo, qty, s1, s2, s3, s4, s5 }
-//     s1–s5 = code letter for that size, or "" if not applicable for that size
-//     "---" means part exists but no specific code (not required / not changed)
 
 const TABLES = [
   {
@@ -1448,9 +1144,6 @@ const TABLES = [
   },
 ];
 
-// ============================================================
-// MACHINE PREPARATION STEPS (PDF page 209, section before 8.1)
-// ============================================================
 const PREP_STEPS = [
   "Deactivate ALL resistances — wait until temperature falls to at least 30°C",
   "Open the film mover grippers",
@@ -1462,9 +1155,6 @@ const PREP_STEPS = [
   "IF pump parts are being changed: close product tank feed tap → start machine → wait until dosage pump clears all pharmaceutical product from feed tube and pump",
 ];
 
-// ============================================================
-// CHANGEOVER STEPS — verbatim from PDF pages 210–225
-// ============================================================
 const STEPS = [
   {
     ref: "8.1.1", title: "A Section — Film Supply and Movement",
@@ -1629,663 +1319,510 @@ const STEPS = [
   },
 ];
 
-// ============================================================
-// FORMAT CHANGE PAGE COMPONENT
-// ============================================================
+
+// ── SECTION COLORS ─────────────────────────────────────────
+const SEC = {
+  LINE: "bg-blue-700 text-blue-100",
+  REEL: "bg-indigo-700 text-indigo-100",
+  FORM: "bg-purple-700 text-purple-100",
+  DOSE: "bg-orange-700 text-orange-100",
+  TANK: "bg-teal-700 text-teal-100",
+  COOL: "bg-cyan-700 text-cyan-100",
+  SEAL: "bg-green-700 text-green-100",
+  CUT:  "bg-rose-700 text-rose-100",
+  CT1:  "bg-yellow-700 text-yellow-100",
+};
+const STOP_STYLE = {
+  "END OF CYCLE":    "bg-yellow-900/40 text-yellow-300 border-yellow-700/40",
+  "IMMEDIATE STOP":  "bg-red-900/40 text-red-300 border-red-700/40",
+  "PREVENTED START": "bg-orange-900/40 text-orange-300 border-orange-700/40",
+  "NO STOP":         "bg-slate-700/40 text-slate-400 border-slate-600/40",
+};
+const P_ICON = {
+  "OPERATOR":"👷","SKILLED OPERATOR":"🔧",
+  "MECHANICAL TECHNICIAN":"⚙️","ELECTRICAL TECHNICIAN":"⚡"
+};
+
+// ── ALARM CARD ─────────────────────────────────────────────
+function AlarmCard({num, a, onClick}) {
+  const isRed = a.c === "RED";
+  const isGrn = a.c === "GREEN";
+  return React.createElement("button", {
+    onClick: function() { onClick(num); },
+    className: "w-full text-left rounded-xl border p-4 transition-all hover:scale-105 cursor-pointer " +
+      (isRed ? "bg-red-950/70 border-red-800/50 hover:border-red-500" :
+       isGrn ? "bg-emerald-950/40 border-emerald-900/50" :
+               "bg-slate-800/60 border-slate-700/40 hover:border-yellow-500/50")
+  },
+    React.createElement("div", {className: "flex items-start justify-between gap-2 mb-2"},
+      React.createElement("div", {className: "flex items-center gap-1.5 flex-wrap"},
+        React.createElement("span", {className: "text-xs font-bold px-2 py-0.5 rounded-full " + (SEC[a.s] || "bg-slate-700 text-slate-100")}, a.s),
+        React.createElement("span", {className: "font-mono text-sm font-black " + (isRed?"text-red-400":isGrn?"text-emerald-400":"text-yellow-400")},
+          (isRed?"🔴 ":isGrn?"🟢 ":"🟡 ") + num
+        )
+      ),
+      React.createElement("span", {className: "text-xs px-1.5 py-0.5 rounded border " + (STOP_STYLE[a.st]||"")},
+        a.st === "IMMEDIATE STOP" ? "⛔ IMMED" : a.st === "END OF CYCLE" ? "🔄 EOC" : a.st === "PREVENTED START" ? "🚫 NO START" : "✅ NO STOP"
+      )
+    ),
+    React.createElement("p", {className: "text-white font-semibold text-sm leading-snug"}, a.n),
+    a.d && React.createElement("p", {className: "text-slate-400 text-xs mt-1 line-clamp-2"}, a.d)
+  );
+}
+
+// ── ALARM DETAIL MODAL ─────────────────────────────────────
+function AlarmModal({num, a, onClose}) {
+  const isRed = a.c === "RED";
+  if (!a) return null;
+  return React.createElement("div", {
+    className: "fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm",
+    onClick: onClose
+  },
+    React.createElement("div", {
+      className: "w-full sm:max-w-2xl max-h-screen overflow-y-auto rounded-t-2xl sm:rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl",
+      onClick: function(e) { e.stopPropagation(); }
+    },
+      // Header
+      React.createElement("div", {className: "p-5 " + (isRed?"bg-red-950":"bg-slate-800") + " border-b border-slate-700 rounded-t-2xl"},
+        React.createElement("div", {className: "flex items-start justify-between gap-3"},
+          React.createElement("div", null,
+            React.createElement("div", {className: "flex items-center gap-2 flex-wrap mb-2"},
+              React.createElement("span", {className: "text-xs font-bold px-2 py-1 rounded-full " + (SEC[a.s]||"")}, a.s),
+              React.createElement("span", {className: "font-mono font-black text-3xl " + (isRed?"text-red-400":"text-yellow-400")}, num),
+              React.createElement("span", {className: "text-xs px-2 py-1 rounded-lg border " + (STOP_STYLE[a.st]||"")}, a.st)
+            ),
+            React.createElement("h2", {className: "text-white font-black text-base"}, a.n)
+          ),
+          React.createElement("button", {onClick: onClose, className: "text-slate-400 hover:text-white text-2xl"}, "✕")
+        ),
+        React.createElement("div", {className: "flex flex-wrap gap-2 mt-3"},
+          React.createElement("span", {className: "text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded-full"},
+            (P_ICON[a.p]||"👷") + " " + a.p
+          ),
+          React.createElement("span", {className: "text-xs px-2 py-1 rounded-full " + (isRed?"bg-red-800 text-red-200":"bg-yellow-900/50 text-yellow-300")},
+            isRed ? "🔴 RED" : a.c === "GREEN" ? "🟢 GREEN" : "🟡 YELLOW"
+          ),
+          a.by === "YES" && React.createElement("span", {className: "text-xs bg-blue-900/60 text-blue-300 px-2 py-1 rounded-full"}, "🔑 Bypass Key")
+        )
+      ),
+      // Body
+      React.createElement("div", {className: "p-5 space-y-4"},
+        a.d && React.createElement("div", null,
+          React.createElement("h3", {className: "text-xs font-bold uppercase tracking-widest text-slate-500 mb-2"}, "📋 What It Means"),
+          React.createElement("div", {className: "bg-slate-800/60 rounded-xl p-4 border border-slate-700/50"},
+            React.createElement("p", {className: "text-slate-200 text-sm leading-relaxed"}, a.d)
+          )
+        ),
+        a.f && React.createElement("div", null,
+          React.createElement("h3", {className: "text-xs font-bold uppercase tracking-widest text-slate-500 mb-2"}, "🔧 How to Fix"),
+          React.createElement("div", {className: "bg-emerald-950/40 border border-emerald-800/40 rounded-xl p-4"},
+            React.createElement("p", {className: "text-slate-200 text-sm leading-relaxed"}, a.f)
+          )
+        )
+      )
+    )
+  );
+}
+
+// ── FORMAT PAGE ────────────────────────────────────────────
 function FormatPage() {
-  const [input, setInput]           = React.useState("");
-  const [size, setSize]             = React.useState(null);
-  const [tab, setTab]               = React.useState("parts");
-  const [openTable, setOpenTable]   = React.useState(null);
-  const [openStep, setOpenStep]     = React.useState(null);
-  const [checked, setChecked]       = React.useState({});
+  const [inp, setInp] = React.useState("");
+  const [sz, setSz] = React.useState(null);
+  const [tab, setTab] = React.useState("parts");
+  const [openT, setOpenT] = React.useState(null);
+  const [openS, setOpenS] = React.useState(null);
+  const [chk, setChk] = React.useState({});
 
-  const search = (val) => {
-    const v = String(val).trim();
-    if (SIZES[v]) { setSize(v); setInput(v); setTab("parts"); setOpenTable(null); setOpenStep(null); }
-    else { setSize(null); }
-  };
-
-  const toggleCheck = (i) => setChecked(p => ({ ...p, [i]: !p[i] }));
-  const doneCount = Object.values(checked).filter(Boolean).length;
-
-  const sizeInt = size ? parseInt(size) : null;
-  const sizeInfo = size ? SIZES[size] : null;
-  const applicableTables = sizeInt ? TABLES.filter(t => t.sizes.includes(sizeInt)) : [];
-  const sCode = size ? `s${size}` : null;
-
-  return (
-    <div className="max-w-3xl mx-auto px-4 py-4 pb-8">
-
-      {/* ── SEARCH HEADER ── */}
-      <div className="bg-slate-800/70 border border-slate-700/50 rounded-2xl p-4 mb-4">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xl">🔄</span>
-          <div>
-            <p className="text-white font-black text-sm">Size Format Change Guide</p>
-            <p className="text-slate-500 text-xs">Enter size number (1–5) → complete parts list + steps</p>
-          </div>
-        </div>
-        <div className="flex gap-2 mb-3">
-          <input
-            type="number" min="1" max="5" value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && search(input)}
-            placeholder="Enter size number 1 to 5"
-            className="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-orange-500"
-          />
-          <button onClick={() => search(input)}
-            className="bg-orange-500 hover:bg-orange-400 text-white font-black px-5 rounded-xl text-sm transition-colors">
-            GO
-          </button>
-        </div>
-        <div className="flex gap-1.5 flex-wrap">
-          {Object.entries(SIZES).map(([n, info]) => (
-            <button key={n} onClick={() => search(n)}
-              className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-all ${
-                size === n ? "bg-orange-500 border-orange-400 text-white"
-                           : "bg-slate-700/40 border-slate-600 text-slate-300 hover:border-orange-400"}`}>
-              Size {n} · {info.code} · {info.material}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* invalid */}
-      {input && !SIZES[input] && (
-        <div className="bg-red-950/50 border border-red-700/50 rounded-xl p-3 text-center mb-4">
-          <p className="text-red-400 font-bold text-sm">⚠️ Invalid — enter 1, 2, 3, 4 or 5 only</p>
-        </div>
-      )}
-
-      {/* ── RESULTS ── */}
-      {size && sizeInfo && (
-        <>
-          {/* Size badge */}
-          <div className="rounded-2xl border border-orange-700/30 bg-slate-800/50 p-4 mb-4 flex items-center gap-4">
-            <div className={`w-14 h-14 ${sizeInfo.bg} rounded-xl flex items-center justify-center text-white font-black text-2xl flex-shrink-0`}>{size}</div>
-            <div>
-              <p className="text-white font-black text-base">Size No.{size} — Code: <span className="text-orange-300">{sizeInfo.code}</span></p>
-              <p className="text-slate-400 text-xs mt-0.5">Part Number: <span className="text-green-400 font-mono">{sizeInfo.partNo}</span></p>
-              <p className="text-slate-400 text-xs">Material: <span className="text-cyan-300 font-bold">{sizeInfo.material}</span></p>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            {[{id:"parts",l:"📦 Parts"},{id:"steps",l:"🔧 Steps"},{id:"prep",l:"⚙️ Prep"}].map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)}
-                className={`py-2.5 rounded-xl text-xs font-black transition-all ${tab===t.id?"bg-orange-500 text-white":"bg-slate-800 text-slate-400 hover:bg-slate-700"}`}>
-                {t.l}
-              </button>
-            ))}
-          </div>
-
-          {/* ── PARTS TAB ── */}
-          {tab === "parts" && (
-            <div className="space-y-3">
-              <p className="text-slate-500 text-xs px-1">
-                Showing {applicableTables.length} tables applicable to Size {size} ({sizeInfo.code}).
-                Orange = size-specific part. Grey = common part (same for multiple sizes).
-              </p>
-              {applicableTables.map((table, ti) => {
-                const isOpen = openTable === ti;
-                const visibleParts = table.parts.filter(p => {
-                  const code = p[sCode];
-                  return code !== undefined && code !== "";
-                });
-                return (
-                  <div key={ti} className="rounded-xl border border-slate-700/40 overflow-hidden">
-                    <button
-                      onClick={() => setOpenTable(isOpen ? null : ti)}
-                      className="w-full flex items-center justify-between p-4 bg-slate-800/60 hover:bg-slate-700/60 transition-colors text-left">
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-mono">{table.tableRef} / {table.drawRef}</span>
-                          <span className="text-white font-bold text-sm">{table.title}</span>
-                        </div>
-                        <p className="text-slate-500 text-xs mt-0.5">{visibleParts.length} parts for Size {size} · {table.subtitle}</p>
-                      </div>
-                      <span className="text-slate-400 text-xl ml-3 flex-shrink-0">{isOpen ? "▲" : "▼"}</span>
-                    </button>
-
-                    {isOpen && (
-                      <div>
-                        {table.note && (
-                          <div className="px-4 py-2.5 bg-blue-950/40 border-b border-slate-700/30">
-                            <p className="text-blue-200 text-xs leading-relaxed">ℹ️ {table.note}</p>
-                          </div>
-                        )}
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-xs min-w-[480px]">
-                            <thead>
-                              <tr className="bg-slate-700/50 text-slate-400">
-                                <th className="px-3 py-2 text-left font-bold w-12">Pos.</th>
-                                <th className="px-3 py-2 text-left font-bold">Description</th>
-                                <th className="px-3 py-2 text-left font-bold w-20">Part No.</th>
-                                <th className="px-3 py-2 text-center font-bold w-12">Qty</th>
-                                <th className="px-3 py-2 text-center font-bold w-16">Size {size}<br/>Code</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {visibleParts.map((part, pi) => {
-                                const code = part[sCode];
-                                const isCommon = code === "Q" || code === "F" || code === "Q+" || code === "---";
-                                return (
-                                  <tr key={pi} className={`border-t border-slate-700/20 ${!isCommon ? "bg-orange-950/25" : pi%2===0?"bg-slate-800/20":""}`}>
-                                    <td className="px-3 py-2 text-slate-500 font-mono">{part.pos}</td>
-                                    <td className="px-3 py-2 text-slate-200 leading-snug">{part.desc}</td>
-                                    <td className="px-3 py-2 text-green-400 font-mono">{part.partNo}</td>
-                                    <td className="px-3 py-2 text-center text-slate-300">{part.qty}</td>
-                                    <td className="px-3 py-2 text-center">
-                                      <span className={`inline-block px-2 py-0.5 rounded-full font-black border text-xs ${
-                                        code === "---" ? "bg-slate-800 text-slate-500 border-slate-600"
-                                        : isCommon    ? "bg-slate-700/60 text-slate-300 border-slate-600"
-                                                      : "bg-orange-500/25 text-orange-300 border-orange-500/50"}`}>
-                                        {code}
-                                      </span>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                        <div className="px-4 py-2 border-t border-slate-700/30 flex gap-4 flex-wrap text-xs text-slate-500">
-                          <span><span className="inline-block w-3 h-3 rounded bg-slate-700/60 mr-1 align-middle"></span>Common part (same for multiple sizes)</span>
-                          <span><span className="inline-block w-3 h-3 rounded bg-orange-950/50 mr-1 align-middle"></span>Size-specific part</span>
-                          <span><span className="text-slate-500 mr-1">---</span>Not changed for this size</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* ── STEPS TAB ── */}
-          {tab === "steps" && (
-            <div className="space-y-2">
-              <p className="text-slate-500 text-xs px-1 mb-3">
-                Changeover procedures from handbook Chapter 8, sections 8.1–8.3.9. Tap to expand each station.
-              </p>
-              {STEPS.map((step, si) => {
-                const isOpen = openStep === si;
-                return (
-                  <div key={si} className="rounded-xl border border-slate-700/40 overflow-hidden">
-                    <button
-                      onClick={() => setOpenStep(isOpen ? null : si)}
-                      className="w-full flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-700/60 transition-colors text-left">
-                      <span className="text-lg flex-shrink-0">{step.icon}</span>
-                      <div className="flex-1 min-w-0">
-                        <span className="text-xs text-slate-500 font-mono">{step.ref}</span>
-                        <p className="text-white font-bold text-sm leading-tight">{step.title}</p>
-                      </div>
-                      <span className="text-slate-400 text-lg flex-shrink-0">{isOpen?"▲":"▼"}</span>
-                    </button>
-                    {isOpen && (
-                      <div className="border-t border-slate-700/30 p-4">
-                        <ol className="space-y-3">
-                          {step.items.map((item, ii) => {
-                            const isWarn = item.startsWith("⚠️");
-                            return (
-                              <li key={ii} className="flex gap-3 items-start">
-                                <span className={`flex-shrink-0 w-6 h-6 rounded-full text-xs font-black flex items-center justify-center mt-0.5 ${isWarn?"bg-yellow-700/50 text-yellow-300":"bg-slate-700 text-slate-300"}`}>
-                                  {isWarn ? "!" : ii+1}
-                                </span>
-                                <p className={`text-xs leading-relaxed ${isWarn?"text-yellow-200 font-semibold":"text-slate-200"}`}>{item}</p>
-                              </li>
-                            );
-                          })}
-                        </ol>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* ── PREP TAB ── */}
-          {tab === "prep" && (
-            <div className="space-y-3">
-              <div className="bg-yellow-950/40 border border-yellow-700/40 rounded-xl p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-yellow-300 font-black text-sm">⚠️ Machine Preparation Checklist</p>
-                  <span className="text-xs font-bold bg-yellow-900/50 text-yellow-300 px-2 py-1 rounded-full">{doneCount}/{PREP_STEPS.length} done</span>
-                </div>
-                <p className="text-slate-400 text-xs mb-3">Complete ALL steps before starting format change. Tap each to mark done.</p>
-                <div className="space-y-2">
-                  {PREP_STEPS.map((step, i) => (
-                    <button key={i} onClick={() => toggleCheck(i)}
-                      className={`w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${
-                        checked[i] ? "bg-green-950/40 border-green-700/40" : "bg-slate-800/40 border-slate-700/30 hover:border-yellow-600/40"}`}>
-                      <span className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-black ${
-                        checked[i] ? "bg-green-600 border-green-500 text-white" : "border-slate-500 text-slate-500"}`}>
-                        {checked[i] ? "✓" : i+1}
-                      </span>
-                      <p className={`text-xs leading-relaxed ${checked[i] ? "text-green-300 line-through opacity-70" : "text-slate-200"}`}>{step}</p>
-                    </button>
-                  ))}
-                </div>
-                {doneCount === PREP_STEPS.length && (
-                  <div className="mt-3 bg-green-900/40 border border-green-700/40 rounded-xl p-3 text-center">
-                    <p className="text-green-300 font-black">✅ All steps complete — safe to begin format change</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-blue-950/40 border border-blue-700/40 rounded-xl p-4">
-                <p className="text-blue-300 font-black text-sm mb-3">🔑 Tool Handles Required</p>
-                <div className="space-y-2">
-                  {[
-                    { code:"015040570", thread:"M6", use:"PVC mould dies" },
-                    { code:"551510155", thread:"M8", use:"ALU valve sealing and knurling dies" },
-                    { code:"015040750", thread:"M8", use:"Under-pump centring dies" },
-                  ].map((t,i) => (
-                    <div key={i} className="flex items-center gap-3 bg-slate-800/40 rounded-lg px-3 py-2">
-                      <span className="text-green-400 font-mono text-xs font-bold flex-shrink-0">{t.code}</span>
-                      <span className="text-slate-500 text-xs flex-shrink-0">({t.thread})</span>
-                      <span className="text-slate-300 text-xs ml-auto text-right">{t.use}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-red-950/30 border border-red-800/30 rounded-xl p-4">
-                <p className="text-red-300 font-black text-sm mb-2">🚨 Safety Warnings (Section 8.4)</p>
-                <ul className="space-y-1.5">
-                  {[
-                    "Pay attention when working on dies — if hot, there is burn danger",
-                    "Danger for overhanging parts during lifter use",
-                    "Caution: entanglement and shearing danger between dies during manual operation",
-                    "Module weight ~500kg — use transpallet with special support (supplied by SARONG)",
-                    "If format type selected on HMI does not match installed format, PLC will not work — always select correct format on HMI after changeover",
-                  ].map((w,i) => (
-                    <li key={i} className="flex gap-2 items-start">
-                      <span className="text-red-400 flex-shrink-0 mt-0.5">▸</span>
-                      <p className="text-slate-300 text-xs leading-relaxed">{w}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* ── DEFAULT — no size selected ── */}
-      {!size && !input && (
-        <div className="space-y-3">
-          <div className="rounded-xl border border-slate-700/30 overflow-hidden">
-            <div className="px-4 py-3 bg-slate-800/60 border-b border-slate-700/30">
-              <p className="text-white font-bold text-sm">All Available Sizes — SAAS 9 AP S/N 1577</p>
-              <p className="text-slate-500 text-xs mt-0.5">Tap any size to view its complete changeover guide</p>
-            </div>
-            {Object.entries(SIZES).map(([n, info]) => (
-              <button key={n} onClick={() => search(n)}
-                className="w-full flex items-center gap-4 px-4 py-3.5 border-b border-slate-700/20 last:border-0 hover:bg-slate-700/30 transition-colors text-left">
-                <div className={`w-10 h-10 ${info.bg} rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0`}>{n}</div>
-                <div className="flex-1">
-                  <p className="text-white font-bold text-sm">Size No.{n} — Code: {info.code}</p>
-                  <p className="text-slate-500 text-xs">{info.partNo} · {info.material}</p>
-                </div>
-                <span className="text-slate-500 text-lg">›</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="bg-slate-800/30 border border-slate-700/20 rounded-xl p-4">
-            <p className="text-slate-300 font-bold text-xs mb-1">📖 About the Format Tables</p>
-            <p className="text-slate-400 text-xs leading-relaxed">
-              The last 4 digits of the Ima-Sarong code number are stamped on each part, along with the letter of the main format it belongs to (Q, R, S, F or H).
-              Sizes 1–3 use PVC/VP format parts. Sizes 4–5 use ALU/VA format parts.
-              Common parts shared by multiple sizes carry the same code letter.
-            </p>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function APKGuide({ onClose }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm" onClick={onClose}>
-      <div
-        className="w-full sm:max-w-2xl max-h-[94vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="p-5 sticky top-0 z-10 bg-slate-900 border-b border-slate-700 rounded-t-2xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-white font-black text-lg">📱 How to Create an APK</h2>
-              <p className="text-slate-400 text-xs mt-0.5">Turn this alarm app into an Android app</p>
-            </div>
-            <button onClick={onClose} className="text-slate-400 hover:text-white text-2xl w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-700">✕</button>
-          </div>
-        </div>
-
-        <div className="p-5 space-y-5">
-          {APK_STEPS.map((section, i) => (
-            <div key={i} className={`rounded-xl border p-4 ${section.highlight ? "bg-emerald-950/40 border-emerald-700/50" : "bg-slate-800/50 border-slate-700/40"}`}>
-              <h3 className={`font-black text-sm mb-3 ${section.highlight ? "text-emerald-300" : "text-white"}`}>
-                {section.icon} Step {i + 1}: {section.title}
-                {section.highlight && <span className="ml-2 text-xs bg-emerald-600 text-white px-2 py-0.5 rounded-full">RECOMMENDED</span>}
-              </h3>
-
-              {section.code && (
-                <div className="bg-slate-950 rounded-lg p-3 mb-3 overflow-x-auto">
-                  <pre className="text-green-400 text-xs font-mono whitespace-pre">{section.code}</pre>
-                </div>
-              )}
-
-              <ul className="space-y-1.5">
-                {section.steps.map((step, j) => (
-                  <li key={j} className="flex items-start gap-2">
-                    <span className={`text-xs mt-0.5 flex-shrink-0 ${section.highlight ? "text-emerald-400" : "text-slate-500"}`}>▸</span>
-                    <p className="text-slate-300 text-xs leading-relaxed">{step}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-
-          <div className="bg-blue-950/40 border border-blue-700/40 rounded-xl p-4">
-            <h3 className="text-blue-300 font-black text-sm mb-2">💡 Quick Summary</h3>
-            <p className="text-slate-300 text-xs leading-relaxed">
-              <strong className="text-white">Easiest:</strong> Use the PWA method — host on GitHub Pages (free) and add to home screen. Works on all phones, no APK needed.<br/><br/>
-              <strong className="text-white">True APK:</strong> Use Expo + EAS Build (cloud build, no Android Studio needed). Run: <code className="text-green-400 bg-slate-900 px-1 rounded">eas build --platform android</code><br/><br/>
-              <strong className="text-white">Full control:</strong> React Native + Android Studio for local APK builds.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================
-// ============================================================
-// FORMAT CHANGE DATA - SAAS 9 AP S/N 1577
-// Source: Operator Handbook Chapter 8 (Size Format Change)
-// ============================================================
-const SIZE_MAP = {
-  "1": { code: "Q100124841", label: "Size 1 (Q)", material: "PVC / Plastic (VP)", color: "bg-purple-700 text-purple-100" },
-  "2": { code: "R100124851", label: "Size 2 (R)", material: "PVC / Plastic (VP)", color: "bg-purple-700 text-purple-100" },
-  "3": { code: "S100124861", label: "Size 3 (S)", material: "PVC / Plastic (VP)", color: "bg-purple-700 text-purple-100" },
-  "4": { code: "F100213631", label: "Size 4 (F)", material: "Aluminium (VA)", color: "bg-amber-700 text-amber-100" },
-  "5": { code: "H100213680", label: "Size 5 (H)", material: "Aluminium (VA)", color: "bg-amber-700 text-amber-100" },
-};
-
-const FORMAT_DATA = {
-  A_VP: {
-    section: "A Section – PVC/Plastic (VP)",
-    fig: "Fig. 82/83",
-    sizes: ["1","2","3"],
-    material: "VP",
-    color: "bg-purple-900/50 border-purple-700/50",
-    badgeColor: "bg-purple-700 text-purple-100",
-    procedure: [
-      "Deactivate all resistances — wait until temp falls to at least 30°C",
-      "Open the film mover grippers",
-      "Open the sealing, preheating and moulding dies",
-      "Disable the moulding blower",
-      "Open the under pump centring dies",
-      "Activate the 'Introduce A section film' command on HMI",
-      "Disconnect the pneumatic power supply (see pneumatic chart)",
-      "Use provided handles to take out the dies (code 015040570 M6 threading for PVC mould dies)"
-    ],
-    parts: [
-      { pos:"1",  desc:"Rear Sealing Die",                         part:"0200", qty:1,  sizes:{1:"Q",2:"R",3:"S"} },
-      { pos:"2",  desc:"Front Sealing Die",                        part:"0250", qty:1,  sizes:{1:"Q",2:"R",3:"S"} },
-        "Replace the film entrainment roll",
-      "Replace the guide for piling",
-      "Replace the guides spacer",
-      "Replace the lower contrast for capacitive sensor",
-      "Replace the guide adjustment template"
-    ],
-    parts: [
-      { pos:"1", desc:"Film Entrainment Roll",                   part:"0100", qty:1, sizes:{1:"Q",2:"R",3:"S",4:"F",5:"H"} },
-      { pos:"2", desc:"Guide for Piling",                        part:"0500", qty:1, sizes:{1:"Q",2:"Q",3:"Q",4:"Q",5:"Q"} },
-      { pos:"3", desc:"Guides Spacer",                           part:"0300", qty:1, sizes:{1:"Q",2:"Q",3:"Q",4:"F",5:"H"} },
-      { pos:"4", desc:"Lower Contrast for Capacitive Sensor",    part:"0900", qty:1, sizes:{1:"Q",2:"R",3:"S",4:"F",5:"H"} },
-      { pos:"5", desc:"Guide Adjustment Template",               part:"1100", qty:2, sizes:{1:"Q",2:"R",3:"S",4:"F",5:"H"} },
-    ]
+  function doSearch(v) {
+    v = String(v).trim();
+    if (SIZES[v]) { setSz(v); setInp(v); setTab("parts"); setOpenT(null); setOpenS(null); }
+    else setSz(null);
   }
-};
 
-// ============================================================
-// FORMAT CHANGE PAGE COMPONENT
-// ============================================================
+  var si = sz ? parseInt(sz) : 0;
+  var sinfo = sz ? SIZES[sz] : null;
+  var sTables = si ? TABLES.filter(function(t){return t.sizes.indexOf(si)>=0;}) : [];
+  var sc = sz ? "s"+sz : null;
+  var doneCount = Object.values(chk).filter(Boolean).length;
 
+  var szBg = {"1":"bg-blue-700","2":"bg-indigo-700","3":"bg-violet-700","4":"bg-amber-700","5":"bg-orange-700"};
 
+  return React.createElement("div", {className: "max-w-3xl mx-auto px-4 py-4 pb-8"},
+    // Search header
+    React.createElement("div", {className: "bg-slate-800/70 border border-slate-700/50 rounded-2xl p-4 mb-4"},
+      React.createElement("p", {className: "text-white font-black text-sm mb-1"}, "🔄 Size Format Change Guide"),
+      React.createElement("p", {className: "text-slate-500 text-xs mb-3"}, "Enter size number (1-5) to get parts list and steps"),
+      React.createElement("div", {className: "flex gap-2 mb-3"},
+        React.createElement("input", {
+          type:"number", min:"1", max:"5", value:inp,
+          onChange: function(e){setInp(e.target.value);},
+          onKeyDown: function(e){if(e.key==="Enter") doSearch(inp);},
+          placeholder:"Enter size number 1 to 5",
+          className:"flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-orange-500"
+        }),
+        React.createElement("button", {
+          onClick: function(){doSearch(inp);},
+          className:"bg-orange-500 hover:bg-orange-400 text-white font-black px-5 rounded-xl text-sm"
+        }, "GO")
+      ),
+      React.createElement("div", {className: "flex gap-2 flex-wrap"},
+        Object.entries(SIZES).map(function(entry) {
+          var n = entry[0]; var info = entry[1];
+          return React.createElement("button", {
+            key:n, onClick:function(){doSearch(n);},
+            className:"text-xs font-bold px-3 py-1.5 rounded-full border " +
+              (sz===n ? "bg-orange-500 border-orange-400 text-white" : "bg-slate-700/40 border-slate-600 text-slate-300")
+          }, "Size "+n+" · "+info.code+" · "+info.material);
+        })
+      )
+    ),
+
+    // Invalid
+    inp && !SIZES[inp] && React.createElement("div", {className:"bg-red-950/50 border border-red-700/50 rounded-xl p-3 text-center mb-4"},
+      React.createElement("p", {className:"text-red-400 font-bold text-sm"}, "⚠️ Invalid — enter 1, 2, 3, 4 or 5 only")
+    ),
+
+    // Results
+    sz && sinfo && React.createElement("div", null,
+      // Size badge
+      React.createElement("div", {className:"rounded-2xl border border-orange-700/30 bg-slate-800/50 p-4 mb-4 flex items-center gap-4"},
+        React.createElement("div", {className:"w-14 h-14 " + (szBg[sz]||"bg-slate-700") + " rounded-xl flex items-center justify-center text-white font-black text-2xl"}, sz),
+        React.createElement("div", null,
+          React.createElement("p", {className:"text-white font-black text-base"}, "Size No."+sz+" — Code: "+sinfo.code),
+          React.createElement("p", {className:"text-slate-400 text-xs mt-0.5"}, "Part Number: "+sinfo.partNo),
+          React.createElement("p", {className:"text-slate-400 text-xs"}, "Material: "+sinfo.material)
+        )
+      ),
+
+      // Tabs
+      React.createElement("div", {className:"grid grid-cols-3 gap-2 mb-4"},
+        ["parts","steps","prep"].map(function(t) {
+          return React.createElement("button", {
+            key:t, onClick:function(){setTab(t);},
+            className:"py-2.5 rounded-xl text-xs font-black " + (tab===t?"bg-orange-500 text-white":"bg-slate-800 text-slate-400")
+          }, t==="parts"?"📦 Parts":t==="steps"?"🔧 Steps":"⚙️ Prep");
+        })
+      ),
+
+      // PARTS TAB
+      tab==="parts" && React.createElement("div", {className:"space-y-3"},
+        sTables.map(function(table, ti) {
+          var isOpen = openT===ti;
+          var visible = table.parts.filter(function(p){return p[sc] && p[sc]!==""});
+          return React.createElement("div", {key:ti, className:"rounded-xl border border-slate-700/40 overflow-hidden"},
+            React.createElement("button", {
+              onClick:function(){setOpenT(isOpen?null:ti);},
+              className:"w-full flex items-center justify-between p-4 bg-slate-800/60 text-left"
+            },
+              React.createElement("div", null,
+                React.createElement("div", {className:"flex items-center gap-2"},
+                  React.createElement("span", {className:"text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-mono"}, table.tableRef+"/"+table.drawRef),
+                  React.createElement("span", {className:"text-white font-bold text-sm"}, table.title)
+                ),
+                React.createElement("p", {className:"text-slate-500 text-xs mt-0.5"}, visible.length+" parts for Size "+sz)
+              ),
+              React.createElement("span", {className:"text-slate-400 text-xl"}, isOpen?"▲":"▼")
+            ),
+            isOpen && React.createElement("div", null,
+              table.note && React.createElement("div", {className:"px-4 py-2.5 bg-blue-950/40 border-b border-slate-700/30"},
+                React.createElement("p", {className:"text-blue-200 text-xs leading-relaxed"}, "ℹ️ "+table.note)
+              ),
+              React.createElement("div", {className:"overflow-x-auto"},
+                React.createElement("table", {className:"w-full text-xs min-w-96"},
+                  React.createElement("thead", null,
+                    React.createElement("tr", {className:"bg-slate-700/50 text-slate-400"},
+                      React.createElement("th", {className:"px-3 py-2 text-left"},"Pos."),
+                      React.createElement("th", {className:"px-3 py-2 text-left"},"Description"),
+                      React.createElement("th", {className:"px-3 py-2 text-left"},"Part No."),
+                      React.createElement("th", {className:"px-3 py-2 text-center"},"Qty"),
+                      React.createElement("th", {className:"px-3 py-2 text-center"},"Code")
+                    )
+                  ),
+                  React.createElement("tbody", null,
+                    visible.map(function(part, pi) {
+                      var code = part[sc];
+                      var isCommon = code==="Q"||code==="F"||code==="Q+"||code==="---";
+                      return React.createElement("tr", {
+                        key:pi,
+                        className:"border-t border-slate-700/20 " + (!isCommon?"bg-orange-950/25":pi%2===0?"bg-slate-800/20":"")
+                      },
+                        React.createElement("td", {className:"px-3 py-2 text-slate-500 font-mono"}, part.pos),
+                        React.createElement("td", {className:"px-3 py-2 text-slate-200"}, part.desc),
+                        React.createElement("td", {className:"px-3 py-2 text-green-400 font-mono"}, part.partNo),
+                        React.createElement("td", {className:"px-3 py-2 text-center text-slate-300"}, part.qty),
+                        React.createElement("td", {className:"px-3 py-2 text-center"},
+                          React.createElement("span", {className:"inline-block px-2 py-0.5 rounded-full font-black border text-xs " +
+                            (code==="---"?"bg-slate-800 text-slate-500 border-slate-600":
+                             isCommon?"bg-slate-700/60 text-slate-300 border-slate-600":
+                             "bg-orange-500/25 text-orange-300 border-orange-500/50")}, code)
+                        )
+                      );
+                    })
+                  )
+                )
+              ),
+              React.createElement("div", {className:"px-4 py-2 border-t border-slate-700/30 text-xs text-slate-500 flex gap-4"},
+                React.createElement("span", null, "Common = grey · Size-specific = orange · --- = not changed")
+              )
+            )
+          );
+        })
+      ),
+
+      // STEPS TAB
+      tab==="steps" && React.createElement("div", {className:"space-y-2"},
+        STEPS.map(function(step, si2) {
+          var isOpen = openS===si2;
+          return React.createElement("div", {key:si2, className:"rounded-xl border border-slate-700/40 overflow-hidden"},
+            React.createElement("button", {
+              onClick:function(){setOpenS(isOpen?null:si2);},
+              className:"w-full flex items-center gap-3 p-3.5 bg-slate-800/60 text-left"
+            },
+              React.createElement("span", {className:"text-lg"}, step.icon),
+              React.createElement("div", {className:"flex-1"},
+                React.createElement("span", {className:"text-xs text-slate-500 font-mono"}, step.ref),
+                React.createElement("p", {className:"text-white font-bold text-sm"}, step.title)
+              ),
+              React.createElement("span", {className:"text-slate-400 text-lg"}, isOpen?"▲":"▼")
+            ),
+            isOpen && React.createElement("div", {className:"border-t border-slate-700/30 p-4"},
+              React.createElement("ol", {className:"space-y-3"},
+                step.items.map(function(item, ii) {
+                  var isW = item.indexOf("⚠️")===0;
+                  return React.createElement("li", {key:ii, className:"flex gap-3 items-start"},
+                    React.createElement("span", {className:"flex-shrink-0 w-6 h-6 rounded-full text-xs font-black flex items-center justify-center mt-0.5 " + (isW?"bg-yellow-700/50 text-yellow-300":"bg-slate-700 text-slate-300")}, isW?"!":ii+1),
+                    React.createElement("p", {className:"text-xs leading-relaxed " + (isW?"text-yellow-200 font-semibold":"text-slate-200")}, item)
+                  );
+                })
+              )
+            )
+          );
+        })
+      ),
+
+      // PREP TAB
+      tab==="prep" && React.createElement("div", {className:"space-y-3"},
+        React.createElement("div", {className:"bg-yellow-950/40 border border-yellow-700/40 rounded-xl p-4"},
+          React.createElement("div", {className:"flex items-center justify-between mb-3"},
+            React.createElement("p", {className:"text-yellow-300 font-black text-sm"}, "⚠️ Machine Preparation Checklist"),
+            React.createElement("span", {className:"text-xs bg-yellow-900/50 text-yellow-300 px-2 py-1 rounded-full"}, doneCount+"/"+PREP_STEPS.length+" done")
+          ),
+          React.createElement("div", {className:"space-y-2"},
+            PREP_STEPS.map(function(step, i) {
+              return React.createElement("button", {
+                key:i, onClick:function(){setChk(function(p){var n=Object.assign({},p); n[i]=!n[i]; return n;});},
+                className:"w-full flex items-start gap-3 p-3 rounded-xl border text-left " +
+                  (chk[i]?"bg-green-950/40 border-green-700/40":"bg-slate-800/40 border-slate-700/30")
+              },
+                React.createElement("span", {className:"flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-black " + (chk[i]?"bg-green-600 border-green-500 text-white":"border-slate-500 text-slate-500")}, chk[i]?"✓":i+1),
+                React.createElement("p", {className:"text-xs leading-relaxed " + (chk[i]?"text-green-300 line-through opacity-70":"text-slate-200")}, step)
+              );
+            })
+          ),
+          doneCount===PREP_STEPS.length && React.createElement("div", {className:"mt-3 bg-green-900/40 border border-green-700/40 rounded-xl p-3 text-center"},
+            React.createElement("p", {className:"text-green-300 font-black"}, "✅ All complete — safe to begin format change")
+          )
+        ),
+        React.createElement("div", {className:"bg-blue-950/40 border border-blue-700/40 rounded-xl p-4"},
+          React.createElement("p", {className:"text-blue-300 font-black text-sm mb-3"}, "🔑 Tool Handles Required"),
+          React.createElement("div", {className:"space-y-2"},
+            [
+              {code:"015040570",thread:"M6",use:"PVC mould dies"},
+              {code:"551510155",thread:"M8",use:"ALU valve sealing and knurling dies"},
+              {code:"015040750",thread:"M8",use:"Under-pump centring dies"},
+            ].map(function(t,i) {
+              return React.createElement("div", {key:i, className:"flex items-center gap-3 bg-slate-800/40 rounded-lg px-3 py-2"},
+                React.createElement("span", {className:"text-green-400 font-mono text-xs font-bold"}, t.code),
+                React.createElement("span", {className:"text-slate-500 text-xs"}, "("+t.thread+")"),
+                React.createElement("span", {className:"text-slate-300 text-xs ml-auto"}, t.use)
+              );
+            })
+          )
+        )
+      )
+    ),
+
+    // Default state
+    !sz && !inp && React.createElement("div", {className:"space-y-3"},
+      React.createElement("div", {className:"rounded-xl border border-slate-700/30 overflow-hidden"},
+        React.createElement("div", {className:"px-4 py-3 bg-slate-800/60 border-b border-slate-700/30"},
+          React.createElement("p", {className:"text-white font-bold text-sm"}, "All Available Sizes — SAAS 9 AP S/N 1577"),
+          React.createElement("p", {className:"text-slate-500 text-xs mt-0.5"}, "Tap any size to view its complete changeover guide")
+        ),
+        Object.entries(SIZES).map(function(entry) {
+          var n = entry[0]; var info = entry[1];
+          return React.createElement("button", {
+            key:n, onClick:function(){doSearch(n);},
+            className:"w-full flex items-center gap-4 px-4 py-3.5 border-b border-slate-700/20 last:border-0 hover:bg-slate-700/30 text-left"
+          },
+            React.createElement("div", {className:"w-10 h-10 " + (szBg[n]||"bg-slate-700") + " rounded-xl flex items-center justify-center text-white font-black text-lg"}, n),
+            React.createElement("div", {className:"flex-1"},
+              React.createElement("p", {className:"text-white font-bold text-sm"}, "Size No."+n+" — Code: "+info.code),
+              React.createElement("p", {className:"text-slate-500 text-xs"}, info.partNo+" · "+info.material)
+            ),
+            React.createElement("span", {className:"text-slate-500 text-lg"}, "›")
+          );
+        })
+      )
+    )
+  );
+}
+
+// ── MAIN APP ───────────────────────────────────────────────
 function App() {
-  const [page, setPage] = useState("alarms"); // "alarms" or "format"
-  const [page, setPage] = useState("alarms"); // "alarms" | "format"
-  const [search, setSearch] = useState("");
-  const [section, setSection] = useState("ALL");
-  const [stopFilter, setStopFilter] = useState("ALL");
-  const [colorFilter, setColorFilter] = useState("ALL");
-  const [selected, setSelected] = useState(null);
-  const [showAPK, setShowAPK] = useState(false);
+  var useState = React.useState;
+  var useMemo = React.useMemo;
 
-  const sections = ["ALL","LINE","REEL","FORM","DOSE","TANK","COOL","SEAL","CUT","CT1"];
-  const stopTypes = ["ALL","IMMEDIATE STOP","END OF CYCLE","PREVENTED START","NO STOP"];
-  const colorTypes = ["ALL","RED","YELLOW","GREEN"];
+  var pageState = useState("alarms");
+  var page = pageState[0]; var setPage = pageState[1];
 
-  const sectionCounts = useMemo(() => {
-    const c = {};
-    Object.values(ALARMS).forEach(a => { c[a.s] = (c[a.s]||0)+1; });
+  var searchState = useState("");
+  var search = searchState[0]; var setSearch = searchState[1];
+
+  var sectionState = useState("ALL");
+  var section = sectionState[0]; var setSection = sectionState[1];
+
+  var stopState = useState("ALL");
+  var stopFilter = stopState[0]; var setStopFilter = stopState[1];
+
+  var colorState = useState("ALL");
+  var colorFilter = colorState[0]; var setColorFilter = colorState[1];
+
+  var selectedState = useState(null);
+  var selected = selectedState[0]; var setSelected = selectedState[1];
+
+  var sectionList = ["ALL","LINE","REEL","FORM","DOSE","TANK","COOL","SEAL","CUT","CT1"];
+  var stopList = ["ALL","IMMEDIATE STOP","END OF CYCLE","PREVENTED START","NO STOP"];
+
+  var secCounts = useMemo(function() {
+    var c = {};
+    Object.values(ALARMS).forEach(function(a) { c[a.s] = (c[a.s]||0)+1; });
     return c;
   }, []);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return Object.entries(ALARMS).filter(([num, a]) => {
-      const matchSearch = !q ||
-        num.includes(q) ||
-        a.n.toLowerCase().includes(q) ||
-        a.d.toLowerCase().includes(q) ||
-        a.f.toLowerCase().includes(q) ||
-        a.s.toLowerCase().includes(q);
-      const matchSection = section === "ALL" || a.s === section;
-      const matchStop = stopFilter === "ALL" || a.st === stopFilter;
-      const matchColor = colorFilter === "ALL" || a.c === colorFilter;
-      return matchSearch && matchSection && matchStop && matchColor;
-    }).sort(([na,a],[nb,b]) => {
-      // Immediate stops first, then by color (RED before YELLOW), then numerically
-      const stopOrder = {"IMMEDIATE STOP":0,"PREVENTED START":1,"END OF CYCLE":2,"NO STOP":3};
-      const colorOrder = {"RED":0,"YELLOW":1,"GREEN":2};
-      if (stopOrder[a.st] !== stopOrder[b.st]) return stopOrder[a.st] - stopOrder[b.st];
-      if (colorOrder[a.c] !== colorOrder[b.c]) return colorOrder[a.c] - colorOrder[b.c];
-      return parseInt(na) - parseInt(nb);
+  var filtered = useMemo(function() {
+    var q = search.trim().toLowerCase();
+    return Object.entries(ALARMS).filter(function(entry) {
+      var num = entry[0]; var a = entry[1];
+      var mS = !q || num.includes(q) || a.n.toLowerCase().includes(q) || a.d.toLowerCase().includes(q) || a.f.toLowerCase().includes(q) || a.s.toLowerCase().includes(q);
+      var mSec = section==="ALL" || a.s===section;
+      var mStop = stopFilter==="ALL" || a.st===stopFilter;
+      var mCol = colorFilter==="ALL" || a.c===colorFilter;
+      return mS && mSec && mStop && mCol;
+    }).sort(function(x,y) {
+      var so = {"IMMEDIATE STOP":0,"PREVENTED START":1,"END OF CYCLE":2,"NO STOP":3};
+      var co = {"RED":0,"YELLOW":1,"GREEN":2};
+      if (so[x[1].st] !== so[y[1].st]) return so[x[1].st]-so[y[1].st];
+      if (co[x[1].c] !== co[y[1].c]) return co[x[1].c]-co[y[1].c];
+      return parseInt(x[0])-parseInt(y[0]);
     });
   }, [search, section, stopFilter, colorFilter]);
 
-  const selectedAlarm = selected ? ALARMS[selected] : null;
+  var selAlarm = selected ? ALARMS[selected] : null;
 
-  return (
-    <div className="min-h-screen bg-slate-950 text-white pb-16" style={{fontFamily:"'Courier New',monospace"}}>
+  return React.createElement("div", {className:"min-h-screen bg-slate-950 text-white pb-16", style:{fontFamily:"monospace"}},
 
-      {/* Header */}
-      <div className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-xl">
-        <div className="max-w-3xl mx-auto px-4 pt-4 pb-3">
+    // ── HEADER (alarms page) ──
+    page==="alarms" && React.createElement("div", {className:"bg-slate-900 border-b border-slate-800 sticky top-0 z-40"},
+      React.createElement("div", {className:"max-w-3xl mx-auto px-4 pt-4 pb-3"},
+        // Title
+        React.createElement("div", {className:"flex items-center gap-3 mb-3"},
+          React.createElement("div", {className:"w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-lg font-black"}, "⚠"),
+          React.createElement("div", {className:"flex-1"},
+            React.createElement("h1", {className:"text-white font-black text-base leading-tight"}, "SAAS 9 AP · Alarm Reference"),
+            React.createElement("p", {className:"text-slate-500 text-xs"}, "S/N 1577 · Aspen · "+Object.keys(ALARMS).length+" alarms")
+          )
+        ),
+        // Search
+        React.createElement("div", {className:"relative mb-2.5"},
+          React.createElement("span", {className:"absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"}, "🔍"),
+          React.createElement("input", {
+            type:"text", value:search,
+            onChange:function(e){setSearch(e.target.value);},
+            placeholder:"Enter alarm code (e.g. 6001) or keyword...",
+            className:"w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-8 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
+          }),
+          search && React.createElement("button", {onClick:function(){setSearch("");}, className:"absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"}, "✕")
+        ),
+        // Section filter
+        React.createElement("div", {className:"flex gap-1.5 overflow-x-auto pb-1"},
+          sectionList.map(function(s) {
+            var active = section===s;
+            return React.createElement("button", {
+              key:s, onClick:function(){setSection(s);},
+              className:"flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-full " +
+                (active ? (s==="ALL"?"bg-orange-500 text-white":(SEC[s]||"bg-slate-600 text-white")) : "bg-slate-800 text-slate-400")
+            }, s + (s!=="ALL" && secCounts[s] ? " "+secCounts[s] : ""));
+          })
+        ),
+        // Stop filter
+        React.createElement("div", {className:"flex gap-1.5 mt-1.5 overflow-x-auto pb-1"},
+          stopList.map(function(t) {
+            var active = stopFilter===t;
+            return React.createElement("button", {
+              key:t, onClick:function(){setStopFilter(t);},
+              className:"flex-shrink-0 text-xs px-2.5 py-1 rounded-full border " +
+                (active ? (t==="IMMEDIATE STOP"?"bg-red-700 border-red-600 text-white":t==="END OF CYCLE"?"bg-yellow-700 border-yellow-600 text-white":t==="PREVENTED START"?"bg-orange-700 border-orange-600 text-white":"bg-slate-600 border-slate-500 text-white") : "bg-transparent border-slate-700 text-slate-500")
+            }, t==="ALL"?"All Stops":t==="IMMEDIATE STOP"?"⛔ Immed":t==="END OF CYCLE"?"🔄 EOC":t==="PREVENTED START"?"🚫 No Start":"✅ No Stop");
+          }),
+          ["RED","YELLOW","GREEN"].map(function(c) {
+            return React.createElement("button", {
+              key:c, onClick:function(){setColorFilter(colorFilter===c?"ALL":c);},
+              className:"flex-shrink-0 text-xs px-2.5 py-1 rounded-full border " +
+                (colorFilter===c ? (c==="RED"?"bg-red-700 border-red-600 text-white":c==="GREEN"?"bg-green-700 border-green-600 text-white":"bg-yellow-700 border-yellow-600 text-white") : "bg-transparent border-slate-700 text-slate-500")
+            }, c==="RED"?"🔴 RED":c==="GREEN"?"🟢 GREEN":"🟡 YELLOW");
+          })
+        ),
+        React.createElement("p", {className:"text-xs text-slate-600 mt-1.5"}, "Showing "+filtered.length+" of "+Object.keys(ALARMS).length+" alarms")
+      )
+    ),
 
-          {/* Title bar */}
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-lg font-black shadow-lg flex-shrink-0">⚠</div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-white font-black text-base leading-tight tracking-tight">SAAS 9 AP</h1>
-              <p className="text-slate-500 text-xs">S/N 1577 · Aspen</p>
-            </div>
-            <button
-              onClick={() => setShowAPK(true)}
-              className="flex-shrink-0 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs px-3 py-2 rounded-xl transition-colors"
-            >
-              📱 APK
-            </button>
-          </div>
+    // ── FORMAT PAGE HEADER ──
+    page==="format" && React.createElement("div", {className:"bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 flex items-center gap-3"},
+      React.createElement("span", {className:"text-xl"}, "🔄"),
+      React.createElement("h1", {className:"text-white font-black text-base"}, "Size Format Change Guide"),
+      React.createElement("p", {className:"text-slate-500 text-xs ml-auto"}, "SAAS 9 AP · S/N 1577")
+    ),
 
-          {/* Page tabs */}
-          <div className="flex gap-2 mb-3">
-            <button
-              onClick={() => setPage("alarms")}
-              className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${page === "alarms" ? "bg-orange-500 text-white" : "bg-slate-800 text-slate-400 hover:bg-slate-700"}`}
-            >
-              🚨 Alarms ({Object.keys(ALARMS).length})
-            </button>
-            <button
-              onClick={() => setPage("format")}
-              className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${page === "format" ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-400 hover:bg-slate-700"}`}
-            >
-              🔄 Format Change
-            </button>
-          </div>
+    // ── ALARM CONTENT ──
+    page==="alarms" && React.createElement("div", {className:"max-w-3xl mx-auto px-4 py-4"},
+      filtered.length===0
+        ? React.createElement("div", {className:"text-center py-20"},
+            React.createElement("p", {className:"text-5xl mb-4"}, "🔍"),
+            React.createElement("p", {className:"text-slate-400 font-bold"}, "No alarm found"),
+            React.createElement("button", {onClick:function(){setSearch("");setSection("ALL");setStopFilter("ALL");setColorFilter("ALL");}, className:"mt-4 text-orange-400 text-sm"}, "Clear filters")
+          )
+        : React.createElement("div", {className:"grid gap-2.5 sm:grid-cols-2"},
+            filtered.map(function(entry) {
+              var num = entry[0]; var a = entry[1];
+              return React.createElement(AlarmCard, {key:num, num:num, a:a, onClick:setSelected});
+            })
+          )
+    ),
 
-          {/* Search */}
-          <div className="relative mb-2.5">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">🔍</span>
-            <input
-              type="text" value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Enter alarm code (e.g. 6001) or keyword..."
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-8 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
-            />
-            {search && (
-              <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-sm">✕</button>
-            )}
-          </div>
+    // ── FORMAT CONTENT ──
+    page==="format" && React.createElement(FormatPage, null),
 
-          {/* Section filter */}
-          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
-            {sections.map(s => {
-              const active = section === s;
-              const col = SECTION_COLORS[s];
-              return (
-                <button key={s} onClick={() => setSection(s)}
-                  className={`flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-full transition-all ${
-                    active ? (s === "ALL" ? "bg-orange-500 text-white" : col.badge) : "bg-slate-800 text-slate-400 hover:bg-slate-700"
-                  }`}
-                >
-                  {s}{s !== "ALL" && <span className="ml-1 opacity-60">{sectionCounts[s]||0}</span>}
-                </button>
-              );
-            })}
-          </div>
+    // ── ALARM MODAL ──
+    selected && selAlarm && React.createElement(AlarmModal, {num:selected, a:selAlarm, onClose:function(){setSelected(null);}}),
 
-          {/* Stop + Color filters */}
-          <div className="flex gap-1.5 mt-1.5 overflow-x-auto pb-1 scrollbar-hide">
-            {stopTypes.map(t => (
-              <button key={t} onClick={() => setStopFilter(t)}
-                className={`flex-shrink-0 text-xs px-2.5 py-1 rounded-full border transition-all ${
-                  stopFilter === t
-                    ? t === "IMMEDIATE STOP" ? "bg-red-700 border-red-600 text-white" :
-                      t === "PREVENTED START" ? "bg-orange-700 border-orange-600 text-white" :
-                      t === "END OF CYCLE" ? "bg-yellow-700 border-yellow-600 text-white" :
-                      "bg-slate-600 border-slate-500 text-white"
-                    : "bg-transparent border-slate-700 text-slate-500 hover:border-slate-500 hover:text-slate-400"
-                }`}
-              >
-                {t === "ALL" ? "All Stops" : t === "IMMEDIATE STOP" ? "⛔ Immed." : t === "END OF CYCLE" ? "🔄 EOC" : t === "PREVENTED START" ? "🚫 No Start" : "✅ No Stop"}
-              </button>
-            ))}
-            {colorTypes.filter(c=>c!=="ALL").map(c => (
-              <button key={c} onClick={() => setColorFilter(colorFilter === c ? "ALL" : c)}
-                className={`flex-shrink-0 text-xs px-2.5 py-1 rounded-full border transition-all ${
-                  colorFilter === c
-                    ? c === "RED" ? "bg-red-700 border-red-600 text-white" : c === "GREEN" ? "bg-green-700 border-green-600 text-white" : "bg-yellow-700 border-yellow-600 text-white"
-                    : "bg-transparent border-slate-700 text-slate-500 hover:border-slate-500"
-                }`}
-              >
-                {c === "RED" ? "🔴" : c === "GREEN" ? "🟢" : "🟡"} {c}
-              </button>
-            ))}
-          </div>
-
-          {/* Results count */}
-          <div className="mt-1.5 text-xs text-slate-600">
-            Showing {filtered.length} of {Object.keys(ALARMS).length} alarms
-            {search && <span className="text-orange-500/70"> for "{search}"</span>}
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      {page === "format" ? <FormatPage /> : <div className="max-w-3xl mx-auto px-4 py-4">
-        {filtered.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-5xl mb-4">🔍</p>
-            <p className="text-slate-400 font-bold">No alarm found</p>
-            <p className="text-slate-600 text-sm mt-1">Try another code or keyword</p>
-            <button
-              onClick={() => { setSearch(""); setSection("ALL"); setStopFilter("ALL"); setColorFilter("ALL"); }}
-              className="mt-4 text-orange-400 text-sm hover:underline"
-            >Clear all filters</button>
-          </div>
-        ) : (
-          <div className="grid gap-2.5 sm:grid-cols-2">
-            {filtered.map(([num, alarm]) => (
-              <AlarmCard key={num} num={num} alarm={alarm} onClick={setSelected} />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Alarm detail modal */}
-      {selected && selectedAlarm && (
-        <AlarmDetail num={selected} alarm={selectedAlarm} onClose={() => setSelected(null)} />
-      )}
-
-      {/* APK guide modal */}
-      {showAPK && <APKGuide onClose={() => setShowAPK(false)} />}
-
-      </div>}
-
-      </div>}
-
-      {/* Footer */}
-      {page === "alarms" && (
-        <div className="text-center py-6 text-slate-700 text-xs border-t border-slate-900 mt-4">
-          SAAS 9 AP · S/N 1577 · Operator Handbook Rev 1.0.0 · March 2025 · {Object.keys(ALARMS).length} alarms
-        </div>
-      )}
-
-      {/* Format Change Page */}
-      {page === "format" && <FormatPage />}
-
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900 border-t border-slate-700 flex">
-        <button
-          onClick={() => setPage("alarms")}
-          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-all ${
-            page === "alarms" ? "text-orange-400" : "text-slate-500 hover:text-slate-300"
-          }`}
-        >
-          <span className="text-xl">⚠️</span>
-          <span className="text-xs font-bold">Alarms</span>
-        </button>
-        <button
-          onClick={() => setPage("format")}
-          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-all ${
-            page === "format" ? "text-orange-400" : "text-slate-500 hover:text-slate-300"
-          }`}
-        >
-          <span className="text-xl">🔄</span>
-          <span className="text-xs font-bold">Format Change</span>
-        </button>
-        <button
-          onClick={() => setShowAPK(true)}
-          className="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-slate-500 hover:text-slate-300 transition-all"
-        >
-          <span className="text-xl">📱</span>
-          <span className="text-xs font-bold">APK Guide</span>
-        </button>
-      </div>
-    </div>
+    // ── BOTTOM NAV ──
+    React.createElement("div", {className:"fixed bottom-0 left-0 right-0 z-50 bg-slate-900 border-t border-slate-700 flex"},
+      [
+        {id:"alarms", icon:"⚠️", label:"Alarms"},
+        {id:"format", icon:"🔄", label:"Format Change"},
+      ].map(function(item) {
+        return React.createElement("button", {
+          key:item.id,
+          onClick:function(){setPage(item.id);},
+          className:"flex-1 flex flex-col items-center justify-center py-3 gap-0.5 " + (page===item.id?"text-orange-400":"text-slate-500")
+        },
+          React.createElement("span", {className:"text-xl"}, item.icon),
+          React.createElement("span", {className:"text-xs font-bold"}, item.label)
+        );
+      })
+    )
   );
 }
 
-const { useState, useMemo } = React;
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App, null));
