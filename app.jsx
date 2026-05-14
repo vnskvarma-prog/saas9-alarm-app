@@ -1806,6 +1806,12 @@ function App() {
     // ── ALARM MODAL ──
     selected && selAlarm && React.createElement(AlarmModal, {num:selected, a:selAlarm, onClose:function(){setSelected(null);}}),
 
+    // ── DEVELOPER CREDIT ──
+    React.createElement("div", {className:"text-center py-4 px-4 border-t border-slate-800/50"},
+      React.createElement("p", {className:"text-slate-600 text-xs"}, "SAAS 9 AP · S/N 1577 · Aspen Pharmacare"),
+      React.createElement("p", {className:"text-slate-500 text-xs mt-1 font-bold"}, "Developed by Dr. Naga Sravan Kumar Varma Vegesna")
+    ),
+
     // ── BOTTOM NAV ──
     React.createElement("div", {className:"fixed bottom-0 left-0 right-0 z-50 bg-slate-900 border-t border-slate-700 flex"},
       [
