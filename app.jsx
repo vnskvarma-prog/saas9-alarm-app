@@ -1730,7 +1730,8 @@ function App() {
           React.createElement("div", {className:"w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-lg font-black"}, "⚠"),
           React.createElement("div", {className:"flex-1"},
             React.createElement("h1", {className:"text-white font-black text-base leading-tight"}, "SAAS 9 AP · Alarm Reference"),
-            React.createElement("p", {className:"text-slate-500 text-xs"}, "S/N 1577 · Aspen · "+Object.keys(ALARMS).length+" alarms")
+              React.createElement("p", {className:"text-orange-400 text-xs font-bold mt-0.5"}, "Developed by Dr. Naga Sravan Kumar Varma Vegesna"),
+            React.createElement("p", {className:"text-slate-500 text-xs"}, "Alphamed Formulations Pvt Ltd, Hyd · "+Object.keys(ALARMS).length+" alarms")
           )
         ),
         // Search
@@ -1781,7 +1782,7 @@ function App() {
     page==="format" && React.createElement("div", {className:"bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 flex items-center gap-3"},
       React.createElement("span", {className:"text-xl"}, "🔄"),
       React.createElement("h1", {className:"text-white font-black text-base"}, "Size Format Change Guide"),
-      React.createElement("p", {className:"text-slate-500 text-xs ml-auto"}, "SAAS 9 AP · S/N 1577")
+      React.createElement("p", {className:"text-orange-400 text-xs font-bold ml-auto"}, "Dr. Naga Sravan Kumar Varma Vegesna")
     ),
 
     // ── ALARM CONTENT ──
@@ -1809,7 +1810,7 @@ function App() {
     // ── DEVELOPER CREDIT ──
     React.createElement("div", {className:"text-center py-4 px-4 border-t border-slate-800/50"},
       React.createElement("p", {className:"text-slate-600 text-xs"}, "SAAS 9 AP · S/N 1577 · Alphamed Formulations Pvt Ltd, Hyd"),
-      React.createElement("p", {className:"text-slate-500 text-xs mt-1 font-bold"}, "Developed by Dr. Naga Sravan Kumar Varma Vegesna")
+      React.createElement("p", {className:"text-orange-400 text-xs mt-1 font-bold"}, "Developed by Dr. Naga Sravan Kumar Varma Vegesna")
     ),
 
     // ── BOTTOM NAV ──
